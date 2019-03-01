@@ -8,19 +8,13 @@ import (
 )
 
 // Operations about object
-type ObjectController struct {
+type ProbjectController struct {
 	beego.Controller
 }
 
 
-
-// @Title Create
-// @Description create object
-// @Param	body		body 	models.Object	true		"The object content"
-// @Success 200 {string} models.Object.Id
-// @Failure 403 body is empty
 // @router / [post]
-func (o *ObjectController) Add() {
+func (o *ProbjectController) Add() {
 	name := o.Input().Get("name")
 	public := o.Input().Get("public")
 
@@ -40,7 +34,7 @@ func (o *ObjectController) Add() {
 }
 
 // @router / [get]
-func (o *ObjectController) Select() {
+func (o *ProbjectController) Select() {
 
 	name := o.Input().Get("name")
 	public := o.Input().Get("public")
@@ -81,14 +75,8 @@ func (o *ObjectController) Select() {
 	fmt.Println(rep)
 }
 
-// @Title Update
-// @Description update the object
-// @Param	objectId		path 	string	true		"The objectid you want to update"
-// @Param	body		body 	models.Object	true		"The body"
-// @Success 200 {object} models.Object
-// @Failure 403 :objectId is empty
 // @router / [put]
-func (o *ObjectController) Put() {
+func (o *ProbjectController) Put() {
 	id := o.Input().Get("pid")
 	public := o.Input().Get("public")
 
@@ -108,7 +96,7 @@ func (o *ObjectController) Put() {
 }
 
 // @router / [delete]
-func (o *ObjectController) Delete() {
+func (o *ProbjectController) Delete() {
 
 	id := o.Input().Get("id")
 	fmt.Println("-----------", id)
