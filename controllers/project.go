@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
+	"strconv"
 )
 
 // Operations about object
@@ -64,15 +65,21 @@ func (o *ProbjectController) Select() {
 
 	//fmt.Println(json)
 
-	if err != nil {
-		o.Ctx.WriteString(err.Error())
-	} else {
-		o.Data["json"] = json
-		o.ServeJSON()
-	}
+
 
 	rep, _ := req.Response()
 	fmt.Println(rep)
+	total,_ := strconv.Atoi(rep.Header.Get("X-Total-Count"))
+	fmt.Println(total)
+
+	rr := map[string]interface{}{"data":json,"total":total}
+
+	if err != nil {
+		o.Ctx.WriteString(err.Error())
+	} else {
+		o.Data["json"] = rr
+		o.ServeJSON()
+	}
 }
 
 // @router / [put]
@@ -108,5 +115,11 @@ func (o *ProbjectController) Delete() {
 	req.SetCookie(cok)
 
 	fmt.Println(req.Response())
+
+}
+
+func count(){
+
+
 
 }
