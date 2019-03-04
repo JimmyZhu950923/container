@@ -117,9 +117,3 @@ func (o *ProbjectController) Delete() {
 	fmt.Println(req.Response())
 
 }
-
-func count(){
-
-
-
-}
