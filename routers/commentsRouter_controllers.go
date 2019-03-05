@@ -7,6 +7,51 @@ import (
 
 func init() {
 
+    beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"],
+        beego.ControllerComments{
+            Method: "AddLabel",
+            Router: `/addLabel`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"],
+        beego.ControllerComments{
+            Method: "DeleteLabel",
+            Router: `/deleteLabel`,
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"],
+        beego.ControllerComments{
+            Method: "FindLabels",
+            Router: `/findLabels`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"],
+        beego.ControllerComments{
+            Method: "FindLabelsById",
+            Router: `/findLabelsById`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:LabelController"],
+        beego.ControllerComments{
+            Method: "UpdateLabel",
+            Router: `/updateLabel`,
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["gt-container-go/controllers:ProbjectController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:ProbjectController"],
         beego.ControllerComments{
             Method: "Add",
@@ -39,6 +84,24 @@ func init() {
             Method: "Delete",
             Router: `/`,
             AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:RepositoriesController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:RepositoriesController"],
+        beego.ControllerComments{
+            Method: "DeleteResporities",
+            Router: `/dr`,
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:RepositoriesController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:RepositoriesController"],
+        beego.ControllerComments{
+            Method: "FindResporities",
+            Router: `/select`,
+            AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
