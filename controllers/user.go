@@ -3,6 +3,7 @@ package controllers
 import (
 	"crypto/tls"
 	"fmt"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
 )
@@ -40,7 +41,7 @@ func (u *UserController) Login() {
 
 	code := rep.StatusCode
 
-	js := map[string]int{"code":code}
+	js := map[string]int{"code": code}
 
 	u.Data["json"] = js
 	u.ServeJSON()
@@ -50,11 +51,11 @@ func (u *UserController) Login() {
 func (u *UserController) Logout() {
 
 	req := httplib.Get("https://kube.gwunion.cn/c/log_out")
-	u.Ctx.SetCookie("sid","","MaxAge=-1")
+	u.Ctx.SetCookie("sid", "", "MaxAge=-1")
 	rep, _ := req.Response()
 
-	code:=rep.StatusCode
-	js := map[string]int{"code":code}
+	code := rep.StatusCode
+	js := map[string]int{"code": code}
 	u.Data["json"] = js
 	u.ServeJSON()
 }

@@ -41,6 +41,11 @@ func init() {
 				&controllers.RepositoriesController{},
 			),
 		),
+		beego.NSNamespace("/tag",
+			beego.NSInclude(
+				&controllers.TagController{},
+			),
+		),
 		beego.NSNamespace("/user",
 			beego.NSInclude(
 				&controllers.UserController{},
