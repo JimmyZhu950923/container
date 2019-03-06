@@ -8,8 +8,9 @@
 package routers
 
 import (
-	"github.com/astaxie/beego/plugins/cors"
 	"gt-container-go/controllers"
+
+	"github.com/astaxie/beego/plugins/cors"
 
 	"github.com/astaxie/beego"
 )
@@ -28,6 +29,16 @@ func init() {
 		beego.NSNamespace("/object",
 			beego.NSInclude(
 				&controllers.ProbjectController{},
+			),
+		),
+		beego.NSNamespace("/label",
+			beego.NSInclude(
+				&controllers.LabelController{},
+			),
+		),
+		beego.NSNamespace("/repositories",
+			beego.NSInclude(
+				&controllers.RepositoriesController{},
 			),
 		),
 		beego.NSNamespace("/user",
