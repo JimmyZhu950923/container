@@ -3,16 +3,16 @@ package controllers
 import (
 	"crypto/tls"
 	"fmt"
+	"strconv"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
-	"strconv"
 )
 
 // Operations about object
 type ProbjectController struct {
 	beego.Controller
 }
-
 
 // @router / [post]
 func (o *ProbjectController) Add() {
@@ -30,7 +30,7 @@ func (o *ProbjectController) Add() {
 	_, _ = req.JSONBody(js)
 
 	rep, _ := req.Response()
-	fmt.Println(rep	)
+	fmt.Println(rep)
 
 }
 
@@ -43,7 +43,7 @@ func (o *ProbjectController) Select() {
 	pageSize := o.Input().Get("page_size")
 
 	cok, _ := o.Ctx.Request.Cookie("sid")
-	fmt.Println("------",cok)
+	fmt.Println("------", cok)
 
 	url := "https://kube.gwunion.cn/api/projects?page=" + page + "&page_size=" + pageSize
 	if name != "" {
@@ -65,14 +65,12 @@ func (o *ProbjectController) Select() {
 
 	//fmt.Println(json)
 
-
-
 	rep, _ := req.Response()
 	fmt.Println(rep)
-	total,_ := strconv.Atoi(rep.Header.Get("X-Total-Count"))
+	total, _ := strconv.Atoi(rep.Header.Get("X-Total-Count"))
 	fmt.Println(total)
 
-	rr := map[string]interface{}{"data":json,"total":total}
+	rr := map[string]interface{}{"data": json, "total": total}
 
 	if err != nil {
 		o.Ctx.WriteString(err.Error())
