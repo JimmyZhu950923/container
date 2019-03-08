@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -14,26 +15,57 @@ type ProbjectController struct {
 	beego.Controller
 }
 
+func getBody(o *ProbjectController) map[string]interface{} {
+	var body map[string]interface{}
+	_ = json.Unmarshal(o.Ctx.Input.RequestBody, &body)
+	return body
+}
+
+// @Title newProject
+// @Description add new project
+// @Param name body string true "project for name"
+// @Param public body bool true "project for public"
+// @Success 200 {string} 提交成功
 // @router / [post]
 func (o *ProbjectController) Add() {
-	name := o.Input().Get("name")
-	public := o.Input().Get("public")
+	body := getBody(o)
+	name := body["name"]
+	var public string
+	if body["public"] == true {
+		public = "true"
+	} else {
+		public = "false"
+	}
 
 	fmt.Println("-----", name, public, "-----")
 
-	cok, _ := o.Ctx.Request.Cookie("sid")
 	js := map[string]interface{}{"project_name": name, "metadata": map[string]string{"public": public}}
 
 	req := httplib.Post("https://kube.gwunion.cn/api/projects")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	req.SetCookie(cok)
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	_, _ = req.JSONBody(js)
 
 	rep, _ := req.Response()
+	if rep.StatusCode == 201 {
+		o.Data["json"] = map[string]int{"code": 20000}
+		o.ServeJSON()
+	} else if rep.StatusCode == 409 {
+		o.Data["json"] = map[string]int{"code": rep.StatusCode}
+		o.ServeJSON()
+	}
+
 	fmt.Println(rep)
 
 }
 
+// @Title ProjectList
+// @Description select project of list
+// @Param name query string false "project for name"
+// @Param public query string false "project for public"
+// @Param page query string false "current page"
+// @Param page_size query string false "page size"
+// @Success 200 {object} model.object
 // @router / [get]
 func (o *ProbjectController) Select() {
 
@@ -41,9 +73,6 @@ func (o *ProbjectController) Select() {
 	public := o.Input().Get("public")
 	page := o.Input().Get("page")
 	pageSize := o.Input().Get("page_size")
-
-	cok, _ := o.Ctx.Request.Cookie("sid")
-	fmt.Println("------", cok)
 
 	url := "https://kube.gwunion.cn/api/projects?page=" + page + "&page_size=" + pageSize
 	if name != "" {
@@ -57,12 +86,12 @@ func (o *ProbjectController) Select() {
 
 	req := httplib.Get(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	req.SetCookie(cok)
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
+
 	req.Param("name", name)
 
-	var json []map[string]interface{}
-	err := req.ToJSON(&json)
-
+	var json1 []map[string]interface{}
+	err := req.ToJSON(&json1)
 	//fmt.Println(json)
 
 	rep, _ := req.Response()
@@ -70,7 +99,7 @@ func (o *ProbjectController) Select() {
 	total, _ := strconv.Atoi(rep.Header.Get("X-Total-Count"))
 	fmt.Println(total)
 
-	rr := map[string]interface{}{"data": json, "total": total}
+	rr := map[string]interface{}{"code": 20000, "data": json1, "total": total}
 
 	if err != nil {
 		o.Ctx.WriteString(err.Error())
@@ -80,38 +109,51 @@ func (o *ProbjectController) Select() {
 	}
 }
 
-// @router / [put]
+// @Title modifiedProject
+// @Description modify project
+// @Param pid path string true "project for id"
+// @Param public query string false "project for public"
+// @Success 200 {string} 修改成功
+// @router /:pid [put]
 func (o *ProbjectController) Put() {
-	id := o.Input().Get("pid")
+	id := o.Ctx.Input.Param(":pid")
 	public := o.Input().Get("public")
-
-	cok, _ := o.Ctx.Request.Cookie("sid")
 
 	url := "https://kube.gwunion.cn/api/projects/" + id
 	req := httplib.Put(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-
 	js := map[string]interface{}{"metadata": map[string]string{"public": public}}
-
 	_, _ = req.JSONBody(js)
+	//req.SetCookie(cok)
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
+	resp, _ := req.Response()
+	fmt.Println(resp)
 
-	req.SetCookie(cok)
-	fmt.Println(req.Response())
+	if resp.StatusCode == 200 {
+		o.Data["json"] = map[string]int{"code": 20000}
+		o.ServeJSON()
+	}
 
 }
 
+// @Title deletedProject
+// @Description delete project
+// @Param id query string true "project for id"
+// @Success 200 {string} 删除成功
 // @router / [delete]
 func (o *ProbjectController) Delete() {
 
 	id := o.Input().Get("id")
 	fmt.Println("-----------", id)
 
-	cok, _ := o.Ctx.Request.Cookie("sid")
 	url := "https://kube.gwunion.cn/api/projects/" + id
 	req := httplib.Delete(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	req.SetCookie(cok)
-
-	fmt.Println(req.Response())
-
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
+	resp, _ := req.Response()
+	fmt.Println(resp)
+	if resp.StatusCode == 200 {
+		o.Data["json"] = map[string]int{"code": 20000}
+		o.ServeJSON()
+	}
 }
