@@ -30,15 +30,6 @@ func (u *UserController) Login() {
 	req.Param("password", password)
 
 	rep, _ := req.Response()
-	coks := rep.Cookies()
-
-	for _, cok := range coks {
-		if cok.Name == "sid" {
-			fmt.Println(cok)
-			u.Ctx.Output.Header("X-Token",cok.Value)
-			u.Ctx.SetCookie("sid", cok.Value)
-		}
-	}
 
 	code := rep.StatusCode
 
@@ -52,7 +43,7 @@ func (u *UserController) Login() {
 func (u *UserController) Logout() {
 
 	req := httplib.Get("https://kube.gwunion.cn/c/log_out")
-	u.Ctx.SetCookie("sid", "", "MaxAge=-1")
+	//u.Ctx.SetCookie("sid", "", "MaxAge=-1")
 	rep, _ := req.Response()
 
 	code := rep.StatusCode

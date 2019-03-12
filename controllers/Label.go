@@ -28,9 +28,8 @@ func (o *LabelController) FindLabels() {
 	url := "https://kube.gwunion.cn/api/labels"
 	req := httplib.Get(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	req.Debug(true)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
-	//req.SetCookie(&cookie)
+	req.Debug(true)
 	req.Param("scope", "p")
 	req.Param("project_id", "9")
 	req.Param("name", name)
@@ -66,9 +65,8 @@ func (o *LabelController) FindLabelsById() {
 	url := "https://kube.gwunion.cn/api/labels/" + id
 	req := httplib.Get(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	req.Debug(true)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
-	//req.SetCookie(&cookie)
+	req.Debug(true)
 	response, _ := req.Response()
 	if response.StatusCode == 200 {
 		var result map[string]interface{}
@@ -102,7 +100,6 @@ func (o *LabelController) AddLabel() {
 	req := httplib.Post(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
-	//req.SetCookie(&cookie)
 	label := map[string]interface{}{"name": name, "description": description, "color": color, "scope": "p", "project_id": 9}
 	_, _ = req.JSONBody(label)
 	response, _ := req.Response()
@@ -134,7 +131,6 @@ func (o *LabelController) UpdateLabel() {
 	req := httplib.Put(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
-	//req.SetCookie(&cookie)
 	label := map[string]interface{}{"name": name, "description": description, "color": color, "scope": "p", "project_id": 3}
 	_, _ = req.JSONBody(label)
 	response, _ := req.Response()
@@ -160,7 +156,6 @@ func (o *LabelController) DeleteLabel() {
 	req := httplib.Delete(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
-	//req.SetCookie(&cookie)
 	req.Debug(true)
 	response, _ := req.Response()
 	if response.StatusCode == 200 {

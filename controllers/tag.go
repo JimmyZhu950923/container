@@ -22,7 +22,9 @@ type TagController struct {
 //@Success 200 {string} 查询成功
 // @router /select [get]
 func (c *TagController) Get() {
-	req := httplib.Get("https://kube.gwunion.cn/api/repositories/venus/nginx/tags?detail=1")
+	repo_name := c.Input().Get("repo_name")
+	url := "https://kube.gwunion.cn/api/repositories/"+repo_name+"/tags?detail=1"
+	req := httplib.Get(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Debug(true)
@@ -48,8 +50,9 @@ func (c *TagController) Get() {
 //@Success 200 {string} 删除成功
 // @router /delete [delete]
 func (c *TagController) Delete() {
+	repo_name := c.Input().Get("repo_name")
 	name := c.Input().Get("name")
-	url := "https://kube.gwunion.cn/api/repositories/venus/nginx/tags/" + name
+	url := "https://kube.gwunion.cn/api/repositories/"+repo_name+"/tags/" + name
 	req := httplib.Delete(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -71,7 +74,8 @@ func (c *TagController) Delete() {
 //@Success 200 {string} 查询成功
 // @router /findLabels [get]
 func (c *TagController) FindLabels() {
-	url := "https://kube.gwunion.cn/api/labels?scope=p&project_id=3"
+	project_id := c.Input().Get("project_id")
+	url := "https://kube.gwunion.cn/api/labels?scope=p&project_id="+project_id
 	req := httplib.Get(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -97,10 +101,11 @@ func (c *TagController) FindLabels() {
 //@Success 200 {string} 删除成功
 // @router /removeLabels [delete]
 func (c *TagController) RemoveLabels() {
+	repo_name := c.Input().Get("repo_name")
 	label_id := c.GetString("label_id")
 	name := c.GetString("name")
 	fmt.Println("-----", label_id, name, "-----")
-	url := "https://kube.gwunion.cn/api/repositories/venus/nginx/tags/" + name + "/labels/" + label_id
+	url := "https://kube.gwunion.cn/api/repositories/"+repo_name+"/tags/" + name + "/labels/" + label_id
 	req := httplib.Delete(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -121,10 +126,11 @@ func (c *TagController) RemoveLabels() {
 //@Success 200 {string} 添加成功
 // @router /addLabels [post]
 func (c *TagController) AddLabels() {
+	repo_name := c.Input().Get("repo_name")
 	name := c.Input().Get("name")
 	label_id, _ := strconv.Atoi(c.Input().Get("label_id"))
 	fmt.Println("-----", label_id, name, "-----")
-	url := "https://kube.gwunion.cn/api/repositories/venus/nginx/tags/" + name + "/labels/"
+	url := "https://kube.gwunion.cn/api/repositories/"+repo_name+"/tags/" + name + "/labels/"
 	req := httplib.Post(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})

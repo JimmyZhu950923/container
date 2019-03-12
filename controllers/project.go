@@ -44,6 +44,7 @@ func (o *ProbjectController) Add() {
 	req := httplib.Post("https://kube.gwunion.cn/api/projects")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
+
 	_, _ = req.JSONBody(js)
 
 	rep, _ := req.Response()
@@ -122,10 +123,9 @@ func (o *ProbjectController) Put() {
 	url := "https://kube.gwunion.cn/api/projects/" + id
 	req := httplib.Put(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	js := map[string]interface{}{"metadata": map[string]string{"public": public}}
 	_, _ = req.JSONBody(js)
-	//req.SetCookie(cok)
-	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	resp, _ := req.Response()
 	fmt.Println(resp)
 

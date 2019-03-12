@@ -30,12 +30,12 @@ func (o *RepositoriesController) FindResporities() {
 	page := o.Input().Get("page")
 	pageSize := o.Input().Get("page_size")
 	projectId := o.Input().Get("project_id")
+
 	//fmt.Println("hhhhhhhhhhhhh", cookie)
 	url := "https://kube.gwunion.cn/api/repositories"
 	req := httplib.Get(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
-	//req.SetCookie(&cookie)
 	req.Debug(true)
 	//定死项目
 	req.Param("project_id", projectId)
