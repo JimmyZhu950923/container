@@ -17,7 +17,7 @@ type UserController struct {
 func (u *UserController) GetAll() {
 }
 
-// @router /login [post]
+// @router /login [get]
 func (u *UserController) Login() {
 	username := u.Input().Get("username")
 	password := u.Input().Get("password")
@@ -35,6 +35,7 @@ func (u *UserController) Login() {
 	for _, cok := range coks {
 		if cok.Name == "sid" {
 			fmt.Println(cok)
+			u.Ctx.Output.Header("X-Token",cok.Value)
 			u.Ctx.SetCookie("sid", cok.Value)
 		}
 	}

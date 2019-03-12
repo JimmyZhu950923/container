@@ -3,7 +3,6 @@ package controllers
 import (
 	"crypto/tls"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -15,7 +14,7 @@ type RepositoriesController struct {
 	beego.Controller
 }
 
-var cookie = http.Cookie{Name: "sid", Value: "50decf9cef14cf68baaead900b57b33f"}
+//var cookie = http.Cookie{Name: "sid", Value: "50decf9cef14cf68baaead900b57b33f"}
 
 //查询镜像仓库
 //@router /select [get]
