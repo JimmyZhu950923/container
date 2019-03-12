@@ -3,11 +3,10 @@ package controllers
 import (
 	"crypto/tls"
 	"fmt"
-	"net/http"
-	"strconv"
-
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
+	"net/http"
+	"strconv"
 )
 
 // Operations about object
@@ -15,7 +14,7 @@ type TagController struct {
 	beego.Controller
 }
 
-var cookie = http.Cookie{Name: "sid", Value: "5f046761ef87620768e897bb15e84ee6"}
+var cookie = http.Cookie{Name: "sid", Value: "169cd9acf17af40e6f222ab85b696d6e"}
 
 // @router /select [get]
 func (c *TagController) Get() {
