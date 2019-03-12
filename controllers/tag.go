@@ -3,7 +3,6 @@ package controllers
 import (
 	"crypto/tls"
 	"fmt"
-
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -23,7 +22,7 @@ type TagController struct {
 // @router /select [get]
 func (c *TagController) Get() {
 	repo_name := c.Input().Get("repo_name")
-	url := "https://kube.gwunion.cn/api/repositories/"+repo_name+"/tags?detail=1"
+	url := "https://kube.gwunion.cn/api/repositories/" + repo_name + "/tags?detail=1"
 	req := httplib.Get(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -52,7 +51,7 @@ func (c *TagController) Get() {
 func (c *TagController) Delete() {
 	repo_name := c.Input().Get("repo_name")
 	name := c.Input().Get("name")
-	url := "https://kube.gwunion.cn/api/repositories/"+repo_name+"/tags/" + name
+	url := "https://kube.gwunion.cn/api/repositories/" + repo_name + "/tags/" + name
 	req := httplib.Delete(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -75,7 +74,7 @@ func (c *TagController) Delete() {
 // @router /findLabels [get]
 func (c *TagController) FindLabels() {
 	project_id := c.Input().Get("project_id")
-	url := "https://kube.gwunion.cn/api/labels?scope=p&project_id="+project_id
+	url := "https://kube.gwunion.cn/api/labels?scope=p&project_id=" + project_id
 	req := httplib.Get(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -105,7 +104,7 @@ func (c *TagController) RemoveLabels() {
 	label_id := c.GetString("label_id")
 	name := c.GetString("name")
 	fmt.Println("-----", label_id, name, "-----")
-	url := "https://kube.gwunion.cn/api/repositories/"+repo_name+"/tags/" + name + "/labels/" + label_id
+	url := "https://kube.gwunion.cn/api/repositories/" + repo_name + "/tags/" + name + "/labels/" + label_id
 	req := httplib.Delete(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -130,7 +129,7 @@ func (c *TagController) AddLabels() {
 	name := c.Input().Get("name")
 	label_id, _ := strconv.Atoi(c.Input().Get("label_id"))
 	fmt.Println("-----", label_id, name, "-----")
-	url := "https://kube.gwunion.cn/api/repositories/"+repo_name+"/tags/" + name + "/labels/"
+	url := "https://kube.gwunion.cn/api/repositories/" + repo_name + "/tags/" + name + "/labels/"
 	req := httplib.Post(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
