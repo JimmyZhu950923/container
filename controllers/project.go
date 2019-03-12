@@ -38,12 +38,12 @@ func (o *ProbjectController) Add() {
 
 	//fmt.Println("-----", name, public, "-----")
 
+	//cok, _ := o.Ctx.Request.Cookie("sid")
 	js := map[string]interface{}{"project_name": name, "metadata": map[string]string{"public": public}}
 
 	req := httplib.Post("https://kube.gwunion.cn/api/projects")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
-
 	_, _ = req.JSONBody(js)
 
 	rep, _ := req.Response()
@@ -87,7 +87,6 @@ func (o *ProbjectController) Select() {
 	req := httplib.Get(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
-
 	req.Param("name", name)
 
 	var json1 []map[string]interface{}
@@ -132,7 +131,7 @@ func (o *ProbjectController) Put() {
 	if resp.StatusCode == 200 {
 		o.Data["json"] = map[string]int{"code": 20000}
 		o.ServeJSON()
-	}else{
+	} else {
 		o.Data["json"] = map[string]int{"code": resp.StatusCode}
 		o.ServeJSON()
 	}
@@ -158,7 +157,7 @@ func (o *ProbjectController) Delete() {
 	if resp.StatusCode == 200 {
 		o.Data["json"] = map[string]int{"code": 20000}
 		o.ServeJSON()
-	}else{
+	} else {
 		o.Data["json"] = map[string]int{"code": resp.StatusCode}
 		o.ServeJSON()
 	}
