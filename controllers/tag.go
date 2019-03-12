@@ -3,10 +3,11 @@ package controllers
 import (
 	"crypto/tls"
 	"fmt"
+
+	"strconv"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
-	"net/http"
-	"strconv"
 )
 
 // Operations about object
@@ -14,74 +15,86 @@ type TagController struct {
 	beego.Controller
 }
 
-var cookie = http.Cookie{Name: "sid", Value: "169cd9acf17af40e6f222ab85b696d6e"}
-
+//@Title allTag
+//@Description select all tag
+//@Param project_name query string true "project's name"
+//@Param repo_name query string true "repository's name"
+//@Success 200 {string} 查询成功
 // @router /select [get]
 func (c *TagController) Get() {
-	//cookie, _ := c.Ctx.Request.Cookie("sid")
-	name := c.Input().Get("name")
-	fmt.Println(name)
 	req := httplib.Get("https://kube.gwunion.cn/api/repositories/venus/nginx/tags?detail=1")
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	req.SetCookie(&cookie)
 	req.Debug(true)
-	//req.Param("repo_name", "z")
-	//req.Param("tag", "111")
 	rep, _ := req.Response()
 	fmt.Println(rep)
-	// total, _ := strconv.Atoi(rep.Header.Get("X-Total-Count"))
-	// fmt.Println(total)
-
-	json := []map[string]interface{}{}
-	err := req.ToJSON(&json)
+	result := []map[string]interface{}{}
+	err := req.ToJSON(&result)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println(json)
+		fmt.Println(result)
 	}
-	// json := map[string]interface{}{"total": total, "result": result}
+	json := map[string]interface{}{"result": result, "code": 20000}
 	c.Data["json"] = json
 	c.ServeJSON()
 	return
 }
 
-// @router / [delete]
+//@Title deleteTag
+//@Description delete tag for selected
+//@Param project_name query string true "project's name"
+//@Param repo_name query string true "repository's name"
+//@Param tag_name query string true "tag's name"
+//@Success 200 {string} 删除成功
+// @router /delete [delete]
 func (c *TagController) Delete() {
-	//cookie, _ := c.Ctx.Request.Cookie("sid")
 	name := c.Input().Get("name")
 	url := "https://kube.gwunion.cn/api/repositories/venus/nginx/tags/" + name
 	req := httplib.Delete(url)
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	req.SetCookie(&cookie)
 	req.Debug(true)
-	//req.Param("repo_name", "z")
 	str, err := req.String()
 	if err != nil {
-		beego.Info(err)
+		fmt.Println(err)
 	}
 	fmt.Println(str)
-	c.Data["json"] = str
+	res := map[string]interface{}{"result": str, "code": 20000}
+	c.Data["json"] = res
 	c.ServeJSON()
 	return
 }
 
+//@Title allLabels
+//@Description select all labels for Tag
+//@Param project_id query int true "project's id"
+//@Success 200 {string} 查询成功
 // @router /findLabels [get]
 func (c *TagController) FindLabels() {
 	url := "https://kube.gwunion.cn/api/labels?scope=p&project_id=3"
 	req := httplib.Get(url)
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Debug(true)
-	req.SetCookie(&cookie)
-	json := []map[string]interface{}{}
-	err := req.ToJSON(&json)
+	result := []map[string]interface{}{}
+	err := req.ToJSON(&result)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println(json)
+		fmt.Println(result)
 	}
+	json := map[string]interface{}{"result": result, "code": 20000}
 	c.Data["json"] = json
 	c.ServeJSON()
 	return
 }
 
+//@Title removeLabels
+//@Description remove one label from your selected tag
+//@Param project_name query string true "project's name"
+//@Param repo_name query string true "repository's name"
+//@Param tag_name query string true "tag's name"
+//@Param label_id query int true "label's id"
+//@Success 200 {string} 删除成功
 // @router /removeLabels [delete]
 func (c *TagController) RemoveLabels() {
 	label_id := c.GetString("label_id")
@@ -89,30 +102,39 @@ func (c *TagController) RemoveLabels() {
 	fmt.Println("-----", label_id, name, "-----")
 	url := "https://kube.gwunion.cn/api/repositories/venus/nginx/tags/" + name + "/labels/" + label_id
 	req := httplib.Delete(url)
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Debug(true)
-	req.SetCookie(&cookie)
 	resp, _ := req.Response()
 	fmt.Println("------------------\n", resp)
+	res := map[string]interface{}{"code": 20000}
+	c.Data["json"] = res
+	c.ServeJSON()
 	return
 }
 
+//@Title addLabels
+//@Description add one label from your selected tag
+//@Param project_name query string true "project's name"
+//@Param repo_name query string true "repository's name"
+//@Param tag_name query string true "tag's name"
+//@Success 200 {string} 添加成功
 // @router /addLabels [post]
 func (c *TagController) AddLabels() {
 	name := c.Input().Get("name")
 	label_id, _ := strconv.Atoi(c.Input().Get("label_id"))
 	fmt.Println("-----", label_id, name, "-----")
-
 	url := "https://kube.gwunion.cn/api/repositories/venus/nginx/tags/" + name + "/labels/"
 	req := httplib.Post(url)
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	js := map[string]int{"id": label_id}
 	req.JSONBody(js)
 	req.Debug(true)
-	req.SetCookie(&cookie)
-
 	resp, _ := req.Response()
-
 	fmt.Println(resp)
+	res := map[string]interface{}{"code": 20000}
+	c.Data["json"] = res
+	c.ServeJSON()
 	return
 }
