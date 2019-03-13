@@ -93,19 +93,17 @@ func (o *ProbjectController) Select() {
 
 	var json1 []map[string]interface{}
 	err := req.ToJSON(&json1)
-	//fmt.Println(json)
 
 	rep, _ := req.Response()
-	fmt.Println(rep)
-	total, _ := strconv.Atoi(rep.Header.Get("X-Total-Count"))
-	fmt.Println(total)
 
-	rr := map[string]interface{}{"code": 20000, "data": json1, "total": total}
-
-	if err != nil {
+	if rep.StatusCode == 200 {
+		total, _ := strconv.Atoi(rep.Header.Get("X-Total-Count"))
+		rr := map[string]interface{}{"code": 20000, "data": json1, "total": total}
 		o.Ctx.WriteString(err.Error())
-	} else {
 		o.Data["json"] = rr
+		o.ServeJSON()
+	} else {
+		o.Data["json"] = map[string]int{"code": rep.StatusCode}
 		o.ServeJSON()
 	}
 }
