@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"crypto/tls"
-	"fmt"
 	"strconv"
 
 	"k8s.io/apimachinery/pkg/util/json"
@@ -25,13 +24,14 @@ type LabelController struct {
 // @router / [get]
 func (o *LabelController) FindLabels() {
 	name := o.Input().Get("name")
+	projectId := o.Input().Get("project_id")
 	url := "https://kube.gwunion.cn/api/labels"
 	req := httplib.Get(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.Debug(true)
 	req.Param("scope", "p")
-	req.Param("project_id", "9")
+	req.Param("project_id", projectId)
 	req.Param("name", name)
 	response, _ := req.Response()
 	//fmt.Println(response)
@@ -61,7 +61,6 @@ func (o *LabelController) FindLabels() {
 //@router /:id [get]
 func (o *LabelController) FindLabelsById() {
 	id := o.Ctx.Input.Param(":id")
-	fmt.Println(id)
 	url := "https://kube.gwunion.cn/api/labels/" + id
 	req := httplib.Get(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})

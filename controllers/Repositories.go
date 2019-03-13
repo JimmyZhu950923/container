@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"crypto/tls"
-	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -46,8 +45,8 @@ func (o *RepositoriesController) FindResporities() {
 		result := []map[string]interface{}{}
 		err := req.ToJSON(&result)
 		if err != nil {
-			fmt.Println(err)
-			fmt.Println(result)
+			//fmt.Println(err)
+			//fmt.Println(result)
 		}
 		json := map[string]interface{}{"total": total, "result": result, "code": 20000}
 		o.Data["json"] = json
@@ -77,9 +76,9 @@ func (o *RepositoriesController) DeleteResporities() {
 	if response.StatusCode == 200 {
 		str, err := req.String()
 		if err != nil {
-			fmt.Println(err, str)
+			//fmt.Println(err, str)
 		}
-		fmt.Println(str)
+		//fmt.Println(str)
 		json := map[string]interface{}{"result": str, "code": 20000}
 
 		o.Data["json"] = json
