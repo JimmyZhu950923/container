@@ -51,7 +51,7 @@ func (o *ProbjectController) Add() {
 	if rep.StatusCode == 201 {
 		o.Data["json"] = map[string]int{"code": 20000}
 		o.ServeJSON()
-	} else if rep.StatusCode == 409 {
+	} else {
 		o.Data["json"] = map[string]int{"code": rep.StatusCode}
 		o.ServeJSON()
 	}
@@ -132,6 +132,9 @@ func (o *ProbjectController) Put() {
 	if resp.StatusCode == 200 {
 		o.Data["json"] = map[string]int{"code": 20000}
 		o.ServeJSON()
+	}else{
+		o.Data["json"] = map[string]int{"code": resp.StatusCode}
+		o.ServeJSON()
 	}
 
 }
@@ -154,6 +157,9 @@ func (o *ProbjectController) Delete() {
 	fmt.Println(resp)
 	if resp.StatusCode == 200 {
 		o.Data["json"] = map[string]int{"code": 20000}
+		o.ServeJSON()
+	}else{
+		o.Data["json"] = map[string]int{"code": resp.StatusCode}
 		o.ServeJSON()
 	}
 }
