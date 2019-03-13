@@ -19,7 +19,7 @@ type TagController struct {
 //@Param project_name query string true "project's name"
 //@Param repo_name query string true "repository's name"
 //@Success 200 {string} 查询成功
-// @router /select [get]
+// @router /allTag [get]
 func (c *TagController) Get() {
 	repo_name := c.Input().Get("repo_name")
 	url := "https://kube.gwunion.cn/api/repositories/" + repo_name + "/tags?detail=1"
@@ -28,16 +28,21 @@ func (c *TagController) Get() {
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Debug(true)
 	rep, _ := req.Response()
-	fmt.Println(rep)
+	//fmt.Println(rep)
 	result := []map[string]interface{}{}
 	err := req.ToJSON(&result)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(result)
 	}
-	json := map[string]interface{}{"result": result, "code": 20000}
-	c.Data["json"] = json
-	c.ServeJSON()
+	if rep.StatusCode == 200 {
+		json := map[string]interface{}{"result": result, "code": 20000}
+		c.Data["json"] = json
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]int{"code": rep.StatusCode}
+		c.ServeJSON()
+	}
 	return
 }
 
@@ -47,7 +52,7 @@ func (c *TagController) Get() {
 //@Param repo_name query string true "repository's name"
 //@Param tag_name query string true "tag's name"
 //@Success 200 {string} 删除成功
-// @router /delete [delete]
+// @router /delTag [delete]
 func (c *TagController) Delete() {
 	repo_name := c.Input().Get("repo_name")
 	name := c.Input().Get("name")
@@ -109,11 +114,16 @@ func (c *TagController) RemoveLabels() {
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Debug(true)
-	resp, _ := req.Response()
-	fmt.Println("------------------\n", resp)
-	res := map[string]interface{}{"code": 20000}
-	c.Data["json"] = res
-	c.ServeJSON()
+	rep, _ := req.Response()
+	//fmt.Println("------------------\n", rep)
+	if rep.StatusCode == 200 {
+		res := map[string]interface{}{"code": 20000}
+		c.Data["json"] = res
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]int{"code": rep.StatusCode}
+		c.ServeJSON()
+	}
 	return
 }
 
@@ -136,10 +146,15 @@ func (c *TagController) AddLabels() {
 	js := map[string]int{"id": label_id}
 	req.JSONBody(js)
 	req.Debug(true)
-	resp, _ := req.Response()
-	fmt.Println(resp)
-	res := map[string]interface{}{"code": 20000}
-	c.Data["json"] = res
-	c.ServeJSON()
+	rep, _ := req.Response()
+	fmt.Println(rep)
+	if rep.StatusCode == 200 {
+		res := map[string]interface{}{"code": 20000}
+		c.Data["json"] = res
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]int{"code": rep.StatusCode}
+		c.ServeJSON()
+	}
 	return
 }
