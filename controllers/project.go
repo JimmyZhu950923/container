@@ -3,7 +3,6 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -37,7 +36,7 @@ func (o *ProbjectController) Add() {
 		public = "false"
 	}
 
-	fmt.Println("-----", name, public, "-----")
+	//fmt.Println("-----", name, public, "-----")
 
 	js := map[string]interface{}{"project_name": name, "metadata": map[string]string{"public": public}}
 
@@ -56,7 +55,7 @@ func (o *ProbjectController) Add() {
 		o.ServeJSON()
 	}
 
-	fmt.Println(rep)
+	//fmt.Println(rep)
 
 }
 
@@ -83,7 +82,7 @@ func (o *ProbjectController) Select() {
 		url += "&public=" + public
 	}
 
-	fmt.Println(url)
+	//fmt.Println(url)
 
 	req := httplib.Get(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -94,12 +93,15 @@ func (o *ProbjectController) Select() {
 	var json1 []map[string]interface{}
 	err := req.ToJSON(&json1)
 
+	if err != nil {
+
+	}
+
 	rep, _ := req.Response()
 
 	if rep.StatusCode == 200 {
 		total, _ := strconv.Atoi(rep.Header.Get("X-Total-Count"))
 		rr := map[string]interface{}{"code": 20000, "data": json1, "total": total}
-		o.Ctx.WriteString(err.Error())
 		o.Data["json"] = rr
 		o.ServeJSON()
 	} else {
@@ -125,7 +127,7 @@ func (o *ProbjectController) Put() {
 	js := map[string]interface{}{"metadata": map[string]string{"public": public}}
 	_, _ = req.JSONBody(js)
 	resp, _ := req.Response()
-	fmt.Println(resp)
+	//fmt.Println(resp)
 
 	if resp.StatusCode == 200 {
 		o.Data["json"] = map[string]int{"code": 20000}
@@ -145,14 +147,14 @@ func (o *ProbjectController) Put() {
 func (o *ProbjectController) Delete() {
 
 	id := o.Input().Get("id")
-	fmt.Println("-----------", id)
+	//fmt.Println("-----------", id)
 
 	url := "https://kube.gwunion.cn/api/projects/" + id
 	req := httplib.Delete(url)
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	resp, _ := req.Response()
-	fmt.Println(resp)
+	//fmt.Println(resp)
 	if resp.StatusCode == 200 {
 		o.Data["json"] = map[string]int{"code": 20000}
 		o.ServeJSON()
