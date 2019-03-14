@@ -3,3 +3,4 @@ controllers/.*
 commentsRouter_controllers.go
 gt-container-go
 lastupdate.tmp
+.DS_*
