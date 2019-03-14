@@ -1,0 +1,5 @@
+controllers/.*
+.idea/
+commentsRouter_controllers.go
+gt-container-go
+lastupdate.tmp
