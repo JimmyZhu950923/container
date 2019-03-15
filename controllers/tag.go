@@ -3,10 +3,9 @@ package controllers
 import (
 	"crypto/tls"
 	"fmt"
-	"strconv"
-
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
+	"strconv"
 )
 
 // Operations about object
@@ -19,10 +18,10 @@ type TagController struct {
 //@Param project_name query string true "project's name"
 //@Param repo_name query string true "repository's name"
 //@Success 200 {string} 查询成功
-// @router /allTag [get]
+// @router / [get]
 func (c *TagController) Get() {
-	repo_name := c.Input().Get("repo_name")
-	url := "https://kube.gwunion.cn/api/repositories/" + repo_name + "/tags?detail=1"
+	repoName := c.Input().Get("repoName")
+	url := "https://kube.gwunion.cn/api/repositories/" + repoName + "/tags?detail=1"
 	req := httplib.Get(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -52,11 +51,12 @@ func (c *TagController) Get() {
 //@Param repo_name query string true "repository's name"
 //@Param tag_name query string true "tag's name"
 //@Success 200 {string} 删除成功
-// @router /delTag [delete]
+// @router / [delete]
 func (c *TagController) Delete() {
-	repo_name := c.Input().Get("repo_name")
+	repoName := c.Input().Get("repoName")
 	name := c.Input().Get("name")
-	url := "https://kube.gwunion.cn/api/repositories/" + repo_name + "/tags/" + name
+	url := "https://kube.gwunion.cn/api/repositories/" + repoName + "/tags/" + name
+	fmt.Println(url)
 	req := httplib.Delete(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -76,10 +76,10 @@ func (c *TagController) Delete() {
 //@Description select all labels for Tag
 //@Param project_id query int true "project's id"
 //@Success 200 {string} 查询成功
-// @router /findLabels [get]
+// @router /label [get]
 func (c *TagController) FindLabels() {
-	project_id := c.Input().Get("project_id")
-	url := "https://kube.gwunion.cn/api/labels?scope=p&project_id=" + project_id
+	projectId := c.Input().Get("projectId")
+	url := "https://kube.gwunion.cn/api/labels?scope=p&project_id=" + projectId
 	req := httplib.Get(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -103,19 +103,20 @@ func (c *TagController) FindLabels() {
 //@Param tag_name query string true "tag's name"
 //@Param label_id query int true "label's id"
 //@Success 200 {string} 删除成功
-// @router /removeLabels [delete]
+// @router /label [delete]
 func (c *TagController) RemoveLabels() {
-	repo_name := c.Input().Get("repo_name")
-	label_id := c.GetString("label_id")
-	name := c.GetString("name")
-	fmt.Println("-----", label_id, name, "-----")
-	url := "https://kube.gwunion.cn/api/repositories/" + repo_name + "/tags/" + name + "/labels/" + label_id
+	repoName := c.Input().Get("repoName")
+	labelId := c.GetString("labelId")
+	tagName := c.GetString("tagName")
+	fmt.Println("-----", labelId, tagName,repoName, "-----")
+	url := "https://kube.gwunion.cn/api/repositories/" + repoName + "/tags/" + tagName + "/labels/" + labelId
+	fmt.Println(url)
 	req := httplib.Delete(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Debug(true)
 	rep, _ := req.Response()
-	//fmt.Println("------------------\n", rep)
+	fmt.Println("------------------\n", rep)
 	if rep.StatusCode == 200 {
 		res := map[string]interface{}{"code": 20000}
 		c.Data["json"] = res
@@ -133,13 +134,14 @@ func (c *TagController) RemoveLabels() {
 //@Param repo_name query string true "repository's name"
 //@Param tag_name query string true "tag's name"
 //@Success 200 {string} 添加成功
-// @router /addLabels [post]
+// @router /label [post]
 func (c *TagController) AddLabels() {
-	repo_name := c.Input().Get("repo_name")
-	name := c.Input().Get("name")
-	label_id, _ := strconv.Atoi(c.Input().Get("label_id"))
-	fmt.Println("-----", label_id, name, "-----")
-	url := "https://kube.gwunion.cn/api/repositories/" + repo_name + "/tags/" + name + "/labels/"
+	repoName := c.Input().Get("repoName")
+	tagName := c.Input().Get("tagName")
+	label_id, _ := strconv.Atoi(c.Input().Get("labelId"))
+	fmt.Println("-----", label_id, tagName, repoName, "-----")
+	url := "https://kube.gwunion.cn/api/repositories/" + repoName + "/tags/" + tagName + "/labels/"
+	fmt.Println(url)
 	req := httplib.Post(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
