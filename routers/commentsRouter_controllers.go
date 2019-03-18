@@ -52,6 +52,60 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"],
+        beego.ControllerComments{
+            Method: "UpdatedPod",
+            Router: `/`,
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"],
+        beego.ControllerComments{
+            Method: "DeletedPod",
+            Router: `/del`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"],
+        beego.ControllerComments{
+            Method: "GetAll",
+            Router: `/getA`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"],
+        beego.ControllerComments{
+            Method: "GetPodsInNameSpace",
+            Router: `/list`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"],
+        beego.ControllerComments{
+            Method: "NewPod",
+            Router: `/newPod`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:PodsController"],
+        beego.ControllerComments{
+            Method: "GetSingle",
+            Router: `/singlePod`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["gt-container-go/controllers:ProbjectController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:ProbjectController"],
         beego.ControllerComments{
             Method: "Add",
@@ -219,6 +273,42 @@ func init() {
             Method: "Logout",
             Router: `/logout`,
             AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:WorkBlanceController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:WorkBlanceController"],
+        beego.ControllerComments{
+            Method: "GetDeployments",
+            Router: `/`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:WorkBlanceController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:WorkBlanceController"],
+        beego.ControllerComments{
+            Method: "CreateDeployment",
+            Router: `/`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:WorkBlanceController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:WorkBlanceController"],
+        beego.ControllerComments{
+            Method: "UpdateDeployment",
+            Router: `/`,
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["gt-container-go/controllers:WorkBlanceController"] = append(beego.GlobalControllerRouter["gt-container-go/controllers:WorkBlanceController"],
+        beego.ControllerComments{
+            Method: "DeleteDeployment",
+            Router: `/`,
+            AllowHTTPMethods: []string{"delete"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
