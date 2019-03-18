@@ -59,6 +59,37 @@ func (o *ProbjectController) Add() {
 
 }
 
+// @Title a Project
+// @Description select project by id
+// @Param id path string false "project for id"
+// @Success 200 {object} model.object
+// @router /:id [get]
+func (o *ProbjectController) Project() {
+	id := o.Ctx.Input.Param(":id")
+
+	url := "https://kube.gwunion.cn/api/projects/" + id
+	req := httplib.Get(url)
+	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
+
+	var json1 map[string]interface{}
+	err := req.ToJSON(&json1)
+
+	if err != nil {
+
+	}
+	rep, _ := req.Response()
+	if rep.StatusCode == 200 {
+		rr := map[string]interface{}{"code": 20000, "data": json1}
+		o.Data["json"] = rr
+		o.ServeJSON()
+	} else {
+		o.Data["json"] = map[string]int{"code": rep.StatusCode}
+		o.ServeJSON()
+	}
+
+}
+
 // @Title ProjectList
 // @Description select project of list
 // @Param name query string false "project for name"
