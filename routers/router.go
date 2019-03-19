@@ -35,6 +35,11 @@ func init() {
 				&controllers.LabelController{},
 			),
 		),
+		beego.NSNamespace("/node",
+			beego.NSInclude(
+				&controllers.NodeController{},
+			),
+		),
 		beego.NSNamespace("/repositories",
 			beego.NSInclude(
 				&controllers.RepositoriesController{},
