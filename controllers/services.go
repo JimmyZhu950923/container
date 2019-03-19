@@ -105,39 +105,20 @@ func (s *ServicesController)NewS() {
 	return
 	}
 
-	// @Title delService
-	// @Description delete one service
-	// @Success 200 {string} 删除成功
-	// @router /delS [get]
-	//func (s *ServicesController)DelS() {
-	//	err := clientset.CoreV1().Services("default").Delete("qeqe", &metav1.DeleteOptions{})
-	//	if err != nil {
-	//		panic(err.Error())
-	//	}
-	//	s.Data["json"] = map[string]string{"data": "成功"}
-	//	s.ServeJSON()
-	//}
-	//
-	//// @Title getService
-	//// @Description get one service
-	//// @Success 200 {string} 查找一个成功
-	//// @router /getS [get]
-	//func (s *ServicesController)GetS() {
-	//	namespace := "default"
-	//	service := "example-service"
-	//	_, err := clientset.CoreV1().Services(namespace).Get(service, metav1.GetOptions{})
-	//	if errors.IsNotFound(err) {
-	//		fmt.Printf("Service %s in namespace %s not found\n", service, namespace)
-	//	} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
-	//		fmt.Printf("Error getting service %s in namespace %s: %v\n",
-	//			service, namespace, statusError.ErrStatus.Message)
-	//	} else if err != nil {
-	//		panic(err.Error())
-	//	} else {
-	//		fmt.Printf("Found serivce %s in namespace %s\n", service, namespace)
-	//	}
-	//}
-	//
+	//@Title delService
+	//@Description delete one service
+	//@Success 200 {string} 删除成功
+	//@router / [delete]
+	func (s *ServicesController)DelS() {
+		name := s.Input().Get("name")
+		err := clientset.CoreV1().Services("default").Delete(name, &metav1.DeleteOptions{})
+		if err != nil {
+			panic(err.Error())
+		}
+		s.Data["json"] = map[string]interface{}{"code": 20000}
+		s.ServeJSON()
+	}
+
 	//// @Title updService
 	//// @Description updeate service
 	//// @Success 200 {string} 更新成功
