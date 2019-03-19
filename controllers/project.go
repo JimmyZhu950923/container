@@ -162,7 +162,7 @@ func (o *ProbjectController) Put() {
 	if resp.StatusCode == 200 {
 		o.Data["json"] = map[string]int{"code": 20000}
 		o.ServeJSON()
-	} else {
+	}else{
 		o.Data["json"] = map[string]int{"code": resp.StatusCode}
 		o.ServeJSON()
 	}
@@ -188,7 +188,7 @@ func (o *ProbjectController) Delete() {
 	if resp.StatusCode == 200 {
 		o.Data["json"] = map[string]int{"code": 20000}
 		o.ServeJSON()
-	} else {
+	}else{
 		o.Data["json"] = map[string]int{"code": resp.StatusCode}
 		o.ServeJSON()
 	}
