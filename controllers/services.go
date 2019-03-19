@@ -31,7 +31,7 @@ func (s *ServicesController) GetAll() {
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("There are %d services in the cluster\n", len(services.Items))
+	//fmt.Printf("There are %d services in the cluster\n", len(services.Items))
 	json := map[string]interface{}{"data": services, "code": 20000}
 	s.Data["json"] = json
 	s.ServeJSON()
@@ -84,10 +84,12 @@ func getInClusterClientset() *kubernetes.Clientset {
 // @Title newService
 // @Description create new service
 // @Success 200 {string} 添加成功
-// @router /newS [get]
+// @router / [post]
 func (s *ServicesController)NewS() {
 	var service v1.Service
-	service.SetName("wentian")
+	name := s.Input().Get("name")
+	service.SetName(name)
+	fmt.Println("name = ", name)
 	service.APIVersion = "v1"
 	service.Kind = "Service"
 	service.Spec = v1.ServiceSpec{
@@ -97,17 +99,18 @@ func (s *ServicesController)NewS() {
 	if err != nil {
 		panic(err.Error())
 	}
-
-	s.Data["json"] = service1
+	json := map[string]interface{}{"data": service1, "code": 20000}
+	s.Data["json"] = json
 	s.ServeJSON()
+	return
 	}
 
-	//// @Title delService
-	//// @Description delete one service
-	//// @Success 200 {string} 删除成功
-	//// @router /delS [get]
+	// @Title delService
+	// @Description delete one service
+	// @Success 200 {string} 删除成功
+	// @router /delS [get]
 	//func (s *ServicesController)DelS() {
-	//	err := clientset.CoreV1().Services("default").Delete("test", &metav1.DeleteOptions{})
+	//	err := clientset.CoreV1().Services("default").Delete("qeqe", &metav1.DeleteOptions{})
 	//	if err != nil {
 	//		panic(err.Error())
 	//	}
