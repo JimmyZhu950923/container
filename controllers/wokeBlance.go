@@ -31,17 +31,18 @@ func (w *WorkBlanceController) GetDeployments() {
 		namespace = apiv1.NamespaceDefault
 	}
 
-	clientset := getClientset()
+	//clientset := getClientset()
 	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 
 	fmt.Printf("Listing deployments in namespace %q:\n", apiv1.NamespaceDefault)
 	list, err := deploymentsClient.List(metav1.ListOptions{})
 	if err != nil {
 		panic(err)
+	} else {
+		w.Data["json"] = map[string]interface{}{"code": 20000, "data": list}
+		w.ServeJSON()
 	}
-	for _, d := range list.Items {
-		fmt.Printf(" * %s (%d replicas)\n", d.Name, *d.Spec.Replicas)
-	}
+
 }
 
 // Create deployment ...
@@ -127,17 +128,20 @@ func (w *WorkBlanceController) CreateDeployment() {
 // @Failure 403
 // @router / [put]
 func (w *WorkBlanceController) UpdateDeployment() {
-	clientset := getClientset()
+	//clientset := getClientset()
 	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 
+	name := w.Input().Get("name")
+	num, _ := strconv.ParseInt(w.Input().Get("num"), 10, 32)
+
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, getErr := deploymentsClient.Get("demo-deployment", metav1.GetOptions{})
+		result, getErr := deploymentsClient.Get(name, metav1.GetOptions{})
 		if getErr != nil {
 			panic(fmt.Errorf("Failed to get latest version of Deployment: %v", getErr))
 		}
 
-		result.Spec.Replicas = int32Ptr(1)                           // reduce replica count
-		result.Spec.Template.Spec.Containers[0].Image = "nginx:1.13" // change nginx version
+		result.Spec.Replicas = int32Ptr(int32(num)) // reduce replica count
+		//result.Spec.Template.Spec.Containers[0].Image = "nginx:1.13" // change nginx version
 		_, updateErr := deploymentsClient.Update(result)
 		return updateErr
 	})
@@ -145,6 +149,8 @@ func (w *WorkBlanceController) UpdateDeployment() {
 		panic(fmt.Errorf("Update failed: %v", retryErr))
 	}
 	fmt.Println("Updated deployment...")
+	w.Data["json"] = map[string]int{"code": 20000}
+	w.ServeJSON()
 }
 
 // Delete deployment by name
@@ -156,15 +162,20 @@ func (w *WorkBlanceController) UpdateDeployment() {
 // @router / [delete]
 func (w *WorkBlanceController) DeleteDeployment() {
 	// Delete Deployment
-	clientset := getClientset()
+	//clientset := getClientset()
+
+	name := w.Input().Get("name")
+
 	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	deletePolicy := metav1.DeletePropagationForeground
-	if err := deploymentsClient.Delete("demo-deployment", &metav1.DeleteOptions{
+	if err := deploymentsClient.Delete(name, &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	}); err != nil {
 		panic(err)
 	}
 	fmt.Println("Deleted deployment.")
+	w.Data["json"] = map[string]int{"code": 20000}
+	w.ServeJSON()
 }
 
 // func prompt() {
