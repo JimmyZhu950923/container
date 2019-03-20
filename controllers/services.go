@@ -11,6 +11,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 // Operations about Users
@@ -27,7 +28,8 @@ var clientset = getClientset()
 // @router / [get]
 func (s *ServicesController) GetAll() {
 	//clientset := getInClusterClientset()
-	services, err := clientset.CoreV1().Services("").List(metav1.ListOptions{})
+	namespace := s.Input().Get("namespace")
+	services, err := clientset.CoreV1().Services(namespace).List(metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
@@ -81,21 +83,25 @@ func getInClusterClientset() *kubernetes.Clientset {
 	return clientset
 }
 
-// @Title newService
+// @Title createService
 // @Description create new service
 // @Success 200 {string} 添加成功
 // @router / [post]
-func (s *ServicesController)NewS() {
+func (s *ServicesController)CreateService() {
 	var service v1.Service
 	name := s.Input().Get("name")
+	port,err := strconv.Atoi(s.Input().Get("port"))
+	namespace := s.Input().Get("namespace")
 	service.SetName(name)
 	fmt.Println("name = ", name)
+	fmt.Println("namespace = ", namespace)
+	fmt.Println("port = ", port)
 	service.APIVersion = "v1"
 	service.Kind = "Service"
 	service.Spec = v1.ServiceSpec{
-		Ports: []v1.ServicePort{v1.ServicePort{Port: 80}},
+		Ports: []v1.ServicePort{v1.ServicePort{Port: int32(port)}},
 	}
-	service1, err := clientset.CoreV1().Services("default").Create(&service)
+	service1, err := clientset.CoreV1().Services(namespace).Create(&service)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -109,9 +115,12 @@ func (s *ServicesController)NewS() {
 	//@Description delete one service
 	//@Success 200 {string} 删除成功
 	//@router / [delete]
-	func (s *ServicesController)DelS() {
+	func (s *ServicesController)DelService() {
 		name := s.Input().Get("name")
-		err := clientset.CoreV1().Services("default").Delete(name, &metav1.DeleteOptions{})
+		namespace := s.Input().Get("namespace")
+		//fmt.Println("name = ", name)
+		//fmt.Println("namespace = ", namespace)
+		err := clientset.CoreV1().Services(namespace).Delete(name, &metav1.DeleteOptions{})
 		if err != nil {
 			panic(err.Error())
 		}
