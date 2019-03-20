@@ -70,6 +70,11 @@ func init() {
 				&controllers.NamespaceController{},
 			),
 		),
+		beego.NSNamespace("/wb",
+			beego.NSInclude(
+				&controllers.WorkBlanceController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 }

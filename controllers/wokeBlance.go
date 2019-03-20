@@ -1,14 +1,15 @@
-	package controllers
+package controllers
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"strconv"
 
+	"github.com/astaxie/beego"
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
-
-	"github.com/astaxie/beego"
 )
 
 // Operations about WorkBlance
@@ -46,19 +47,33 @@ func (w *WorkBlanceController) GetDeployments() {
 // Create deployment ...
 // @Title Create deployment
 // @Description get Userinfo
-// @Param query query string false "Filter. e.g. col1:v1,col2:v2 ..."
+// @Param name query string "Name of the deployment"
+// @Param num query string "replicas of the deployment"
+// @Param image query string "image of the deployment"
+// @Param namespace query string "namespace of the deployment"
 // @Success 200 {object} models.Userinfo
 // @Failure 403
 // @router / [post]
 func (w *WorkBlanceController) CreateDeployment() {
-	clientset := getClientset()
+	//clientset := getClientset()
+
+	name := w.Input().Get("name")
+	num, err := strconv.ParseInt(w.Input().Get("num"), 10, 32)
+	image := w.Input().Get("image")
+	namespace := w.Input().Get("namespace")
+
+	fmt.Println(">>>>>>>>>>>>>")
+	fmt.Println(name, num, image, namespace)
+	fmt.Println(">>>>>>>>>>>>>")
+
 	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	var deployment = &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "demo-deployment",
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(2),
+			Replicas: int32Ptr(int32(num)),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"app": "demo",
@@ -74,7 +89,7 @@ func (w *WorkBlanceController) CreateDeployment() {
 					Containers: []apiv1.Container{
 						{
 							Name:  "web",
-							Image: "kube.gwunion.cn/venus/nginx:alpine",
+							Image: "kube.gwunion.cn/" + image,
 							Ports: []apiv1.ContainerPort{
 								{
 									Name:          "http",
@@ -91,10 +106,17 @@ func (w *WorkBlanceController) CreateDeployment() {
 	// Create Deployment
 	fmt.Println("Creating deployment...")
 	result, err := deploymentsClient.Create(deployment)
+
 	if err != nil {
-		panic(err)
+		k8Err := err.(*errors.StatusError)
+		//fmt.Println(k8Err.ErrStatus.Code)
+		w.Data["json"] = map[string]interface{}{"code": k8Err.ErrStatus.Code, "message": "负载" + name + "已存在"}
+		w.ServeJSON()
+	} else {
+		fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
+		w.Data["json"] = map[string]int{"code": 20000}
+		w.ServeJSON()
 	}
-	fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
 }
 
 // Update deployment
