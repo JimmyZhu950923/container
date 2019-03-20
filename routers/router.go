@@ -65,6 +65,11 @@ func init() {
 				&controllers.PodsController{},
 			),
 		),
+		beego.NSNamespace("/namespace",
+			beego.NSInclude(
+				&controllers.NamespaceController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 }
