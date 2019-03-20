@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"flag"
-	"fmt"
 	"github.com/astaxie/beego"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -93,9 +92,9 @@ func (s *ServicesController)CreateService() {
 	port,err := strconv.Atoi(s.Input().Get("port"))
 	namespace := s.Input().Get("namespace")
 	service.SetName(name)
-	fmt.Println("name = ", name)
-	fmt.Println("namespace = ", namespace)
-	fmt.Println("port = ", port)
+	//fmt.Println("name = ", name)
+	//fmt.Println("namespace = ", namespace)
+	//fmt.Println("port = ", port)
 	service.APIVersion = "v1"
 	service.Kind = "Service"
 	service.Spec = v1.ServiceSpec{
