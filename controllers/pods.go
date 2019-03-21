@@ -66,17 +66,10 @@ func (p *PodsController) GetPodsInNameSpace() {
 	//clientset := getClientset()
 	nameSpace := p.Input().Get("nameSpace")
 	//fmt.Println(nameSpace)
-	pods, err := clientset.CoreV1().Pods(nameSpace).List(metav1.ListOptions{FieldSelector: "spec.nodeName=node2"})
 
-	//var newItem []v1.Pod
-	//
-	//for _, e := range pods.Items {
-	//	if e.Spec.NodeName == "node2" {
-	//		newItem = append(newItem, e)
-	//	}
-	//}
-	//
-	//pods.Items = newItem
+	var listOptions metav1.ListOptions
+	listOptions.LabelSelector = "run=nginx"
+	pods, err := clientset.CoreV1().Pods(nameSpace).List(listOptions)
 
 	if err != nil {
 		panic(err.Error())
