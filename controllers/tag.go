@@ -31,8 +31,8 @@ func (c *TagController) Get() {
 	result := []map[string]interface{}{}
 	err := req.ToJSON(&result)
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println(result)
+		//fmt.Println(err)
+		//fmt.Println(result)
 	}
 	if rep.StatusCode == 200 {
 		json := map[string]interface{}{"result": result, "code": 20000}
@@ -56,16 +56,16 @@ func (c *TagController) Delete() {
 	repoName := c.Input().Get("repoName")
 	name := c.Input().Get("name")
 	url := "https://kube.gwunion.cn/api/repositories/" + repoName + "/tags/" + name
-	fmt.Println(url)
+	//fmt.Println(url)
 	req := httplib.Delete(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Debug(true)
 	str, err := req.String()
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 	}
-	fmt.Println(str)
+	//fmt.Println(str)
 	res := map[string]interface{}{"result": str, "code": 20000}
 	c.Data["json"] = res
 	c.ServeJSON()
@@ -87,8 +87,8 @@ func (c *TagController) FindLabels() {
 	result := []map[string]interface{}{}
 	err := req.ToJSON(&result)
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println(result)
+		//fmt.Println(err)
+		//fmt.Println(result)
 	}
 	json := map[string]interface{}{"result": result, "code": 20000}
 	c.Data["json"] = json
@@ -108,7 +108,7 @@ func (c *TagController) RemoveLabels() {
 	repoName := c.Input().Get("repoName")
 	labelId := c.GetString("labelId")
 	tagName := c.GetString("tagName")
-	fmt.Println("-----", labelId, tagName,repoName, "-----")
+	//fmt.Println("-----", labelId, tagName,repoName, "-----")
 	url := "https://kube.gwunion.cn/api/repositories/" + repoName + "/tags/" + tagName + "/labels/" + labelId
 	fmt.Println(url)
 	req := httplib.Delete(url)
@@ -116,7 +116,7 @@ func (c *TagController) RemoveLabels() {
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.Debug(true)
 	rep, _ := req.Response()
-	fmt.Println("------------------\n", rep)
+	//fmt.Println("------------------\n", rep)
 	if rep.StatusCode == 200 {
 		res := map[string]interface{}{"code": 20000}
 		c.Data["json"] = res
@@ -139,9 +139,9 @@ func (c *TagController) AddLabels() {
 	repoName := c.Input().Get("repoName")
 	tagName := c.Input().Get("tagName")
 	label_id, _ := strconv.Atoi(c.Input().Get("labelId"))
-	fmt.Println("-----", label_id, tagName, repoName, "-----")
+	//fmt.Println("-----", label_id, tagName, repoName, "-----")
 	url := "https://kube.gwunion.cn/api/repositories/" + repoName + "/tags/" + tagName + "/labels/"
-	fmt.Println(url)
+	//fmt.Println(url)
 	req := httplib.Post(url)
 	req.Header("authorization", "Basic YWRtaW46SGFyYm9yMTIzNDU=")
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -149,7 +149,7 @@ func (c *TagController) AddLabels() {
 	req.JSONBody(js)
 	req.Debug(true)
 	rep, _ := req.Response()
-	fmt.Println(rep)
+	//fmt.Println(rep)
 	if rep.StatusCode == 200 {
 		res := map[string]interface{}{"code": 20000}
 		c.Data["json"] = res

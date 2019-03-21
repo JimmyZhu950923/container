@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"flag"
-	"fmt"
 	"github.com/astaxie/beego"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,6 +10,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 // Operations about Users
@@ -27,11 +27,12 @@ var clientset = getClientset()
 // @router / [get]
 func (s *ServicesController) GetAll() {
 	//clientset := getInClusterClientset()
-	services, err := clientset.CoreV1().Services("").List(metav1.ListOptions{})
+	namespace := s.Input().Get("namespace")
+	services, err := clientset.CoreV1().Services(namespace).List(metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("There are %d services in the cluster\n", len(services.Items))
+	//fmt.Printf("There are %d services in the cluster\n", len(services.Items))
 	json := map[string]interface{}{"data": services, "code": 20000}
 	s.Data["json"] = json
 	s.ServeJSON()
@@ -81,60 +82,51 @@ func getInClusterClientset() *kubernetes.Clientset {
 	return clientset
 }
 
-// @Title newService
+// @Title createService
 // @Description create new service
 // @Success 200 {string} 添加成功
-// @router /newS [get]
-func (s *ServicesController)NewS() {
+// @router / [post]
+func (s *ServicesController)CreateService() {
 	var service v1.Service
-	service.SetName("wentian")
+	name := s.Input().Get("name")
+	port,err := strconv.Atoi(s.Input().Get("port"))
+	namespace := s.Input().Get("namespace")
+	service.SetName(name)
+	//fmt.Println("name = ", name)
+	//fmt.Println("namespace = ", namespace)
+	//fmt.Println("port = ", port)
 	service.APIVersion = "v1"
 	service.Kind = "Service"
 	service.Spec = v1.ServiceSpec{
-		Ports: []v1.ServicePort{v1.ServicePort{Port: 80}},
+		Ports: []v1.ServicePort{v1.ServicePort{Port: int32(port)}},
 	}
-	service1, err := clientset.CoreV1().Services("default").Create(&service)
+	service1, err := clientset.CoreV1().Services(namespace).Create(&service)
 	if err != nil {
 		panic(err.Error())
 	}
-
-	s.Data["json"] = service1
+	json := map[string]interface{}{"data": service1, "code": 20000}
+	s.Data["json"] = json
 	s.ServeJSON()
+	return
 	}
 
-	//// @Title delService
-	//// @Description delete one service
-	//// @Success 200 {string} 删除成功
-	//// @router /delS [get]
-	//func (s *ServicesController)DelS() {
-	//	err := clientset.CoreV1().Services("default").Delete("test", &metav1.DeleteOptions{})
-	//	if err != nil {
-	//		panic(err.Error())
-	//	}
-	//	s.Data["json"] = map[string]string{"data": "成功"}
-	//	s.ServeJSON()
-	//}
-	//
-	//// @Title getService
-	//// @Description get one service
-	//// @Success 200 {string} 查找一个成功
-	//// @router /getS [get]
-	//func (s *ServicesController)GetS() {
-	//	namespace := "default"
-	//	service := "example-service"
-	//	_, err := clientset.CoreV1().Services(namespace).Get(service, metav1.GetOptions{})
-	//	if errors.IsNotFound(err) {
-	//		fmt.Printf("Service %s in namespace %s not found\n", service, namespace)
-	//	} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
-	//		fmt.Printf("Error getting service %s in namespace %s: %v\n",
-	//			service, namespace, statusError.ErrStatus.Message)
-	//	} else if err != nil {
-	//		panic(err.Error())
-	//	} else {
-	//		fmt.Printf("Found serivce %s in namespace %s\n", service, namespace)
-	//	}
-	//}
-	//
+	//@Title delService
+	//@Description delete one service
+	//@Success 200 {string} 删除成功
+	//@router / [delete]
+	func (s *ServicesController)DelService() {
+		name := s.Input().Get("name")
+		namespace := s.Input().Get("namespace")
+		//fmt.Println("name = ", name)
+		//fmt.Println("namespace = ", namespace)
+		err := clientset.CoreV1().Services(namespace).Delete(name, &metav1.DeleteOptions{})
+		if err != nil {
+			panic(err.Error())
+		}
+		s.Data["json"] = map[string]interface{}{"code": 20000}
+		s.ServeJSON()
+	}
+
 	//// @Title updService
 	//// @Description updeate service
 	//// @Success 200 {string} 更新成功
