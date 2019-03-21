@@ -91,6 +91,7 @@ func (s *ServicesController)CreateService() {
 	name := s.Input().Get("name")
 	port,err := strconv.Atoi(s.Input().Get("port"))
 	namespace := s.Input().Get("namespace")
+	kind := s.Input().Get("type")
 	service.SetName(name)
 	//fmt.Println("name = ", name)
 	//fmt.Println("namespace = ", namespace)
@@ -99,6 +100,7 @@ func (s *ServicesController)CreateService() {
 	service.Kind = "Service"
 	service.Spec = v1.ServiceSpec{
 		Ports: []v1.ServicePort{v1.ServicePort{Port: int32(port)}},
+		Type: v1.ServiceType(kind),
 	}
 	service1, err := clientset.CoreV1().Services(namespace).Create(&service)
 	if err != nil {
