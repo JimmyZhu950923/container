@@ -160,8 +160,8 @@ func (w *WorkBlanceController) DeleteDeployment() {
 	//clientset := getClientset()
 
 	name := w.Input().Get("name")
-
-	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+	namespace := w.Input().Get("namespace")
+	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 	deletePolicy := metav1.DeletePropagationForeground
 	if err := deploymentsClient.Delete(name, &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
