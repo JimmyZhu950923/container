@@ -25,14 +25,9 @@ type WorkBlanceController struct {
 // @Failure 403
 // @router / [get]
 func (w *WorkBlanceController) GetDeployments() {
-	namespace := w.Input().Get("namespace")
-
-	if namespace == "" {
-		namespace = apiv1.NamespaceDefault
-	}
 
 	//clientset := getClientset()
-	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+	deploymentsClient := clientset.AppsV1().Deployments("")
 
 	fmt.Printf("Listing deployments in namespace %q:\n", apiv1.NamespaceDefault)
 	list, err := deploymentsClient.List(metav1.ListOptions{})
@@ -67,7 +62,7 @@ func (w *WorkBlanceController) CreateDeployment() {
 	fmt.Println(name, num, image, namespace)
 	fmt.Println(">>>>>>>>>>>>>")
 
-	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 	var deployment = &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
