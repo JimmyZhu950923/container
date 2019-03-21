@@ -66,17 +66,17 @@ func (p *PodsController) GetPodsInNameSpace() {
 	//clientset := getClientset()
 	nameSpace := p.Input().Get("nameSpace")
 	//fmt.Println(nameSpace)
-	pods, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
+	pods, err := clientset.CoreV1().Pods(nameSpace).List(metav1.ListOptions{FieldSelector: "spec.nodeName=node2"})
 
-	var newItem []v1.Pod
-
-	for _, e := range pods.Items {
-		if e.Spec.NodeName == "node2" {
-			newItem = append(newItem, e)
-		}
-	}
-
-	pods.Items = newItem
+	//var newItem []v1.Pod
+	//
+	//for _, e := range pods.Items {
+	//	if e.Spec.NodeName == "node2" {
+	//		newItem = append(newItem, e)
+	//	}
+	//}
+	//
+	//pods.Items = newItem
 
 	if err != nil {
 		panic(err.Error())
@@ -108,14 +108,20 @@ func (p *PodsController) NewPod() {
 
 // @Title delete pod
 // @Description delete a pod
-// @router /del [get]
+// @Param name query true "name of the pod"
+// @router / [delete]
 func (p *PodsController) DeletedPod() {
-	err := clientset.CoreV1().Pods("default").Delete("wentian", &metav1.DeleteOptions{})
+
+	name := p.Input().Get("name")
+	namespace := p.Input().Get("namespace")
+	err := clientset.CoreV1().Pods(namespace).Delete(name, &metav1.DeleteOptions{})
 
 	if err != nil {
 		panic(err.Error())
+		p.Data["json"] = map[string]int{"message": 111111111}
+		p.ServeJSON()
 	}
-	p.Data["json"] = map[string]string{"data": "成功"}
+	p.Data["json"] = map[string]int{"code": 20000}
 	p.ServeJSON()
 }
 
