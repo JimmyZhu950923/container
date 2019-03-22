@@ -22,7 +22,7 @@ type ServicesController struct {
 var clientset = getClientset()
 
 // @Title GetAll
-// @Description get all Pods
+// @Description get all Services,
 // @Success 200 {object} models.User
 // @router / [get]
 func (s *ServicesController) GetAll() {
@@ -33,6 +33,24 @@ func (s *ServicesController) GetAll() {
 		panic(err.Error())
 	}
 	//fmt.Printf("There are %d services in the cluster\n", len(services.Items))
+	json := map[string]interface{}{"data": services, "code": 20000}
+	s.Data["json"] = json
+	s.ServeJSON()
+}
+
+// @Title GetSingle
+// @Description get one Service,
+// @Success 200 {object} models.User
+// @router /single [get]
+func (s *ServicesController) GetSingle() {
+	namespace := s.Input().Get("namespace")
+	name := s.Input().Get("name")
+	//fmt.Println("namespace = ", namespace)
+	//fmt.Println("name = ", name)
+	services, err :=clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
 	json := map[string]interface{}{"data": services, "code": 20000}
 	s.Data["json"] = json
 	s.ServeJSON()
