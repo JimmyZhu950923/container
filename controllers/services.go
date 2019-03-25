@@ -23,6 +23,7 @@ var clientset = getClientset()
 
 // @Title GetAll
 // @Description get all Services,
+// @Param namespace query string false "namespace for service"
 // @Success 200 {object} models.User
 // @router / [get]
 func (s *ServicesController) GetAll() {
@@ -40,10 +41,12 @@ func (s *ServicesController) GetAll() {
 
 // @Title GetSingle
 // @Description get one Service,
+// @Param namespace query string false "namespace for service"
+// @Param name query string false "name for service"
 // @Success 200 {object} models.User
-// @router /single [get]
+// @router /:namespace [get]
 func (s *ServicesController) GetSingle() {
-	namespace := s.Input().Get("namespace")
+	namespace := s.Input().Get(":namespace")
 	name := s.Input().Get("name")
 	//fmt.Println("namespace = ", namespace)
 	//fmt.Println("name = ", name)
@@ -102,6 +105,10 @@ func getInClusterClientset() *kubernetes.Clientset {
 
 // @Title createService
 // @Description create new service
+// @Param name body string false "name for service"
+// @Param port body string false "port for service"
+// @Param namespace body string false "namespace for service"
+// @Param type body string false "type for service"
 // @Success 200 {string} 添加成功
 // @router / [post]
 func (s *ServicesController)CreateService() {
@@ -114,6 +121,7 @@ func (s *ServicesController)CreateService() {
 	//fmt.Println("name = ", name)
 	//fmt.Println("namespace = ", namespace)
 	//fmt.Println("port = ", port)
+	//fmt.Println("type = ", kind)
 	service.APIVersion = "v1"
 	service.Kind = "Service"
 	service.Spec = v1.ServiceSpec{
@@ -130,22 +138,24 @@ func (s *ServicesController)CreateService() {
 	return
 	}
 
-	//@Title delService
-	//@Description delete one service
-	//@Success 200 {string} 删除成功
-	//@router / [delete]
-	func (s *ServicesController)DelService() {
-		name := s.Input().Get("name")
-		namespace := s.Input().Get("namespace")
-		//fmt.Println("name = ", name)
-		//fmt.Println("namespace = ", namespace)
-		err := clientset.CoreV1().Services(namespace).Delete(name, &metav1.DeleteOptions{})
-		if err != nil {
-			panic(err.Error())
-		}
-		s.Data["json"] = map[string]interface{}{"code": 20000}
-		s.ServeJSON()
+// @Title delService
+// @Description delete one service
+// @Param name query string false "name for service"
+// @Param namespace query string false "namespace for service"
+// @Success 200 {string} 删除成功
+// @router / [delete]
+func (s *ServicesController)DelService() {
+	name := s.Input().Get("name")
+	namespace := s.Input().Get("namespace")
+	//fmt.Println("name = ", name)
+	//fmt.Println("namespace = ", namespace)
+	err := clientset.CoreV1().Services(namespace).Delete(name, &metav1.DeleteOptions{})
+	if err != nil {
+		panic(err.Error())
 	}
+	s.Data["json"] = map[string]interface{}{"code": 20000}
+	s.ServeJSON()
+}
 
 	//// @Title updService
 	//// @Description updeate service
