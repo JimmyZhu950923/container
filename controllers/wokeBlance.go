@@ -17,6 +17,29 @@ type WorkBlanceController struct {
 	beego.Controller
 }
 
+// @Title Singel Selete
+// @Description get Single Deployment By name
+// @Param name path string false "name of the deployment"
+// @Param namespace query string false "namespace of the deployment"
+// @Success 200 {object} models.Userinfo
+// @Failure 403
+// @router /:name [get]
+func (w *WorkBlanceController) GetSingleDeployment() {
+
+	name := w.Ctx.Input.Param(":name")
+	namespace := w.Input().Get("namespace")
+	deploymentsClient := clientset.AppsV1().Deployments(namespace)
+
+	deployment, err := deploymentsClient.Get(name, metav1.GetOptions{})
+	if err != nil {
+		panic(err)
+	} else {
+		w.Data["json"] = map[string]interface{}{"code": 20000, "data": deployment}
+		w.ServeJSON()
+	}
+
+}
+
 // GetAll ...
 // @Title Get All Deployments
 // @Description get Deployments
@@ -124,7 +147,10 @@ func (w *WorkBlanceController) CreateDeployment() {
 // @router / [put]
 func (w *WorkBlanceController) UpdateDeployment() {
 	//clientset := getClientset()
-	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+
+	namespace := w.Input().Get("namespace")
+
+	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 
 	name := w.Input().Get("name")
 	num, _ := strconv.ParseInt(w.Input().Get("num"), 10, 32)
@@ -160,8 +186,8 @@ func (w *WorkBlanceController) DeleteDeployment() {
 	//clientset := getClientset()
 
 	name := w.Input().Get("name")
-
-	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+	namespace := w.Input().Get("namespace")
+	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 	deletePolicy := metav1.DeletePropagationForeground
 	if err := deploymentsClient.Delete(name, &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
