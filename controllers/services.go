@@ -41,12 +41,12 @@ func (s *ServicesController) GetAll() {
 
 // @Title GetSingle
 // @Description get one Service,
-// @Param namespace query string false "namespace for service"
+// @Param namespace path string false "namespace for service"
 // @Param name query string false "name for service"
 // @Success 200 {object} models.User
 // @router /:namespace [get]
 func (s *ServicesController) GetSingle() {
-	namespace := s.Input().Get(":namespace")
+	namespace := s.Ctx.Input.Param(":namespace")
 	name := s.Input().Get("name")
 	//fmt.Println("namespace = ", namespace)
 	//fmt.Println("name = ", name)
