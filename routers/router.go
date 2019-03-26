@@ -55,6 +55,11 @@ func init() {
 				&controllers.ServicesController{},
 			),
 		),
+		beego.NSNamespace("/storage",
+			beego.NSInclude(
+				&controllers.StorageController{},
+				),
+			),
 		beego.NSNamespace("/user",
 			beego.NSInclude(
 				&controllers.UserController{},
