@@ -41,8 +41,8 @@ func (p *PodsController) GetSingle() {
 	//clientset := getClientset()
 
 	namespace := p.Input().Get("namespace")
-	pod := p.Input().Get("podName")
-	_, err := clientset.CoreV1().Pods(namespace).Get(pod, metav1.GetOptions{})
+	podName := p.Input().Get("podName")
+	pod, err := clientset.CoreV1().Pods(namespace).Get(podName, metav1.GetOptions{})
 
 	if errors.IsNotFound(err) {
 		fmt.Printf("Pod %s in namespace %s not found\n", pod, namespace)
@@ -52,7 +52,9 @@ func (p *PodsController) GetSingle() {
 	} else if err != nil {
 		panic(err.Error())
 	} else {
-		fmt.Printf("Found pod %s in namespace %s\n", pod, namespace)
+		//fmt.Printf("Found pod %s in namespace %s\n", pod, namespace)
+		p.Data["json"] = map[string]interface{}{"code": 20000, "data": pod}
+		p.ServeJSON()
 	}
 }
 
