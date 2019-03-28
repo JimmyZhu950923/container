@@ -69,8 +69,9 @@ func (p *PodsController) GetPodsInNameSpace() {
 	//clientset := getClientset()
 	nameSpace := p.Input().Get("nameSpace")
 	deploymentName := p.Input().Get("deploymentName")
+	daemonsetName := p.Input().Get("daemonsetName")
 	nodeName := p.Input().Get("nodeName")
-	//fmt.Println(nameSpace)
+	//fmt.Println(daemonsetName)
 
 	var listOptions metav1.ListOptions
 	if nodeName != "" {
@@ -95,6 +96,13 @@ func (p *PodsController) GetPodsInNameSpace() {
 
 					break
 				}
+			}
+		}
+		pods.Items = podItems
+	} else if daemonsetName != "" {
+		for _, item3 := range pods.Items {
+			if item3.OwnerReferences[0].Name == daemonsetName {
+				podItems = append(podItems, item3)
 			}
 		}
 		pods.Items = podItems
