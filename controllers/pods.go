@@ -158,7 +158,7 @@ func (p *PodsController) UpdatedPod() {
 	namespace := p.Input().Get("nameSpace")
 
 	var pod1 v1.Pod
-	err1 := json.Unmarshal([]byte(pod), pod1)
+	err1 := json.Unmarshal([]byte(pod), &pod1)
 	if err1 != nil {
 		panic(err1.Error())
 	}
