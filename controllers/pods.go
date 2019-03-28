@@ -40,8 +40,8 @@ func (p *PodsController) GetAll() {
 func (p *PodsController) GetSingle() {
 	//clientset := getClientset()
 
-	namespace := "default"
-	pod := "example-xxxxx"
+	namespace := p.Input().Get("namespace")
+	pod := p.Input().Get("podName")
 	_, err := clientset.CoreV1().Pods(namespace).Get(pod, metav1.GetOptions{})
 
 	if errors.IsNotFound(err) {
@@ -74,21 +74,28 @@ func (p *PodsController) GetPodsInNameSpace() {
 		listOptions.FieldSelector = "spec.nodeName=" + nodeName
 	}
 
+	pods, err := clientset.CoreV1().Pods(nameSpace).List(listOptions)
+	var podItems []v1.Pod
 	if deploymentName != "" {
 		rs, err := clientset.AppsV1().ReplicaSets(nameSpace).List(listOptions)
 		if err != nil {
 			panic(err.Error())
 		} else {
-			for _, item := range rs.Items {
-				if item.OwnerReferences[0].Name == deploymentName {
-					listOptions.LabelSelector = "pod-template-hash=" + item.Labels["pod-template-hash"]
+			for _, item1 := range rs.Items {
+				if item1.OwnerReferences[0].Name == deploymentName {
+
+					for _, item2 := range pods.Items {
+						if item2.OwnerReferences[0].Name == item1.Name {
+							podItems = append(podItems, item2)
+						}
+					}
+
 					break
 				}
 			}
 		}
+		pods.Items = podItems
 	}
-
-	pods, err := clientset.CoreV1().Pods(nameSpace).List(listOptions)
 
 	if err != nil {
 		panic(err.Error())
