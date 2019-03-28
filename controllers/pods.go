@@ -154,8 +154,8 @@ func (p *PodsController) DeletedPod() {
 // @Success 200 {string} 修改成功
 // @router / [put]
 func (p *PodsController) UpdatedPod() {
-	pod := p.Input().Get("pods")
-	namespace := p.Input().Get("namespace")
+	pod := p.Input().Get("name")
+	namespace := p.Input().Get("nameSpace")
 
 	var pod1 v1.Pod
 	json.Unmarshal([]byte(pod), pod1)
