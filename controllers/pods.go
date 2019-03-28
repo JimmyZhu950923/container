@@ -40,9 +40,9 @@ func (p *PodsController) GetAll() {
 func (p *PodsController) GetSingle() {
 	//clientset := getClientset()
 
-	namespace := "default"
-	pod := "example-xxxxx"
-	_, err := clientset.CoreV1().Pods(namespace).Get(pod, metav1.GetOptions{})
+	namespace := p.Input().Get("namespace")
+	podName := p.Input().Get("podName")
+	pod, err := clientset.CoreV1().Pods(namespace).Get(podName, metav1.GetOptions{})
 
 	if errors.IsNotFound(err) {
 		fmt.Printf("Pod %s in namespace %s not found\n", pod, namespace)
@@ -52,7 +52,9 @@ func (p *PodsController) GetSingle() {
 	} else if err != nil {
 		panic(err.Error())
 	} else {
-		fmt.Printf("Found pod %s in namespace %s\n", pod, namespace)
+		//fmt.Printf("Found pod %s in namespace %s\n", pod, namespace)
+		p.Data["json"] = map[string]interface{}{"code": 20000, "data": pod}
+		p.ServeJSON()
 	}
 }
 
@@ -65,11 +67,37 @@ func (p *PodsController) GetPodsInNameSpace() {
 
 	//clientset := getClientset()
 	nameSpace := p.Input().Get("nameSpace")
+	deploymentName := p.Input().Get("deploymentName")
+	nodeName := p.Input().Get("nodeName")
 	//fmt.Println(nameSpace)
 
 	var listOptions metav1.ListOptions
-	listOptions.LabelSelector = "run=nginx"
+	if nodeName != "" {
+		listOptions.FieldSelector = "spec.nodeName=" + nodeName
+	}
+
 	pods, err := clientset.CoreV1().Pods(nameSpace).List(listOptions)
+	var podItems []v1.Pod
+	if deploymentName != "" {
+		rs, err := clientset.AppsV1().ReplicaSets(nameSpace).List(listOptions)
+		if err != nil {
+			panic(err.Error())
+		} else {
+			for _, item1 := range rs.Items {
+				if item1.OwnerReferences[0].Name == deploymentName {
+
+					for _, item2 := range pods.Items {
+						if item2.OwnerReferences[0].Name == item1.Name {
+							podItems = append(podItems, item2)
+						}
+					}
+
+					break
+				}
+			}
+		}
+		pods.Items = podItems
+	}
 
 	if err != nil {
 		panic(err.Error())
