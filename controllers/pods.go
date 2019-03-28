@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego"
 	"k8s.io/api/core/v1"
@@ -153,10 +154,12 @@ func (p *PodsController) DeletedPod() {
 // @Success 200 {string} 修改成功
 // @router / [put]
 func (p *PodsController) UpdatedPod() {
-	name := p.Input().Get("name")
-	nameSpace := p.Input().Get("nameSpace")
-	pod, err := clientset.CoreV1().Pods(nameSpace).Get(name, metav1.GetOptions{})
-	_, err = clientset.CoreV1().Pods(nameSpace).Update(pod)
+	pod := p.Input().Get("pods")
+	namespace := p.Input().Get("namespace")
+
+	var pod1 v1.Pod
+	json.Unmarshal([]byte(pod), pod1)
+	_, err := clientset.CoreV1().Pods(namespace).Update(&pod1)
 
 	if err != nil {
 		p.Data["json"] = map[string]interface{}{"code": 400, "data": err.Error()}
