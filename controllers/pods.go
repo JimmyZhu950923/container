@@ -65,10 +65,29 @@ func (p *PodsController) GetPodsInNameSpace() {
 
 	//clientset := getClientset()
 	nameSpace := p.Input().Get("nameSpace")
+	deploymentName := p.Input().Get("deploymentName")
+	nodeName := p.Input().Get("nodeName")
 	//fmt.Println(nameSpace)
 
 	var listOptions metav1.ListOptions
-	listOptions.LabelSelector = "run=nginx"
+	if nodeName != "" {
+		listOptions.FieldSelector = "spec.nodeName=" + nodeName
+	}
+
+	if deploymentName != "" {
+		rs, err := clientset.AppsV1().ReplicaSets(nameSpace).List(listOptions)
+		if err != nil {
+			panic(err.Error())
+		} else {
+			for _, item := range rs.Items {
+				if item.OwnerReferences[0].Name == deploymentName {
+					listOptions.LabelSelector = "pod-template-hash=" + item.Labels["pod-template-hash"]
+					break
+				}
+			}
+		}
+	}
+
 	pods, err := clientset.CoreV1().Pods(nameSpace).List(listOptions)
 
 	if err != nil {

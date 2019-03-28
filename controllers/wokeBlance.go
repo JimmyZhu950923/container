@@ -52,7 +52,7 @@ func (w *WorkBlanceController) GetSingleDeployment() {
 func (w *WorkBlanceController) GetDeployments() {
 
 	//clientset := getClientset()
-	deploymentsClient := clientset.AppsV1().Deployments("")
+	deploymentsClient := clientset.AppsV1().Deployments(w.Input().Get("namespace"))
 
 	list, err := deploymentsClient.List(metav1.ListOptions{})
 	if err != nil {
@@ -322,7 +322,7 @@ func (w *WorkBlanceController) UpdateDaemonset() {
 func (w *WorkBlanceController) GetDaemonset() {
 
 	//clientset := getClientset()
-	daemosetsClient := clientset.AppsV1().DaemonSets("")
+	daemosetsClient := clientset.AppsV1().DaemonSets(w.Input().Get("namespace"))
 
 	list, err := daemosetsClient.List(metav1.ListOptions{})
 	if err != nil {
