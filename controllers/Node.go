@@ -12,6 +12,15 @@ type NodeController struct {
 	beego.Controller
 }
 
+// 返回的pod中cpu，memory数据,pod数量
+type podData struct {
+	CpuRequests    int //cpu请求值
+	CpuLimits      int //cpu限制值
+	MemoryRequests int //内存请求值
+	MemoryLimits   int //内存限制值
+	podNum         int //pod数量
+}
+
 //var clientset = getClientset()
 
 // @Title GetAll
@@ -41,7 +50,27 @@ func (n *NodeController) GetByName() {
 	if err != nil {
 		panic(err)
 	}
-	n.Data["json"] = map[string]interface{}{"data": node, "code": 20000}
+	pod, err := GetPodByNodeName(name)
+	if err != nil {
+		panic(err)
+	}
+	for _, v := range pod.Items {
+		req := v.Spec.Containers[0].Resources.Requests
+		lim := v.Spec.Containers[0].Resources.Limits
+		if req != nil {
+			a := req["cpu"]
+			cpuR := a.String()[0 : len(a.String())-1]
+			fmt.Println(cpuR)
+		}
+		if lim != nil {
+
+		}
+
+		fmt.Println("cpu>>>:", req["cpu"], "memory>>>:", req["memory"])
+		fmt.Println("Lcpu:", lim["cpu"], "Lmemory:", lim["memory"])
+	}
+
+	n.Data["json"] = map[string]interface{}{"data": node, "pod": pod, "code": 20000}
 	n.ServeJSON()
 	return
 }
