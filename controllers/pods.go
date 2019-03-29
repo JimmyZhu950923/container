@@ -14,35 +14,15 @@ type PodsController struct {
 	beego.Controller
 }
 
-// @Title GetAll
-// @Description get all Pods
-// @Success 200 {object} models.User
-// @router /getA		ll [get]
-func (p *PodsController) GetAll() {
-	//clientset := getClientset()
-	//clientset := getInClusterClientset()
-	pods, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
-	if err != nil {
-		panic(err.Error())
-	}
-	fmt.Printf("There are %d pods in the cluster\n", len(pods.Items))
-	p.Data["json"] = pods
-	p.ServeJSON()
-	// Examples for error handling:
-	// - Use helper functions like e.g. errors.IsNotFound()
-	// - And/or cast to StatusError and use its properties like e.g. ErrStatus.Message
-
-}
-
 // @Title Get
 // @Description get Pod by namespace
 // @Success 200 {object} models.User
-// @router /singlePod [get]
+// @router /:podName [get]
 func (p *PodsController) GetSingle() {
 	//clientset := getClientset()
 
 	namespace := p.Input().Get("namespace")
-	podName := p.Input().Get("podName")
+	podName := p.Ctx.Input.Param(":podName")
 	pod, err := clientset.CoreV1().Pods(namespace).Get(podName, metav1.GetOptions{})
 
 	if errors.IsNotFound(err) {
@@ -61,22 +41,20 @@ func (p *PodsController) GetSingle() {
 
 // @Title GetPodsInNameSpace
 // @Description get Pods in Namespace default
-// @Param nodeName query string true "节点名称"
+// @Param nameSpace query string true "namespace"
+// @Param deploymentName query string true "deployment's name"
+// @Param daemonsetName query string true "daemonset's name"
 // @Success 200 {object} models.User
-// @router /list [get]
+// @router / [get]
 func (p *PodsController) GetPodsInNameSpace() {
 
 	//clientset := getClientset()
 	nameSpace := p.Input().Get("nameSpace")
 	deploymentName := p.Input().Get("deploymentName")
 	daemonsetName := p.Input().Get("daemonsetName")
-	nodeName := p.Input().Get("nodeName")
 	//fmt.Println(daemonsetName)
 
 	var listOptions metav1.ListOptions
-	if nodeName != "" {
-		listOptions.FieldSelector = "spec.nodeName=" + nodeName
-	}
 
 	pods, err := clientset.CoreV1().Pods(nameSpace).List(listOptions)
 	var podItems []v1.Pod
@@ -117,6 +95,13 @@ func (p *PodsController) GetPodsInNameSpace() {
 		p.ServeJSON()
 	}
 
+}
+
+func GetPodByNodeName(nodeName string) (*v1.PodList, error) {
+	var listOptions metav1.ListOptions
+	listOptions.FieldSelector = "spec.nodeName=" + nodeName
+	pods, err := clientset.CoreV1().Pods("").List(listOptions)
+	return pods, err
 }
 
 // @Title newPod
