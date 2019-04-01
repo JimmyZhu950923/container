@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/astaxie/beego"
@@ -50,8 +51,8 @@ func (s *ServicesController) GetServices() {
 func (s *ServicesController) GetSingleService() {
 	namespace := s.Ctx.Input.Param(":namespace")
 	name := s.Input().Get("name")
-	fmt.Println("namespace = ", namespace)
-	fmt.Println("name = ", name)
+	//fmt.Println("namespace = ", namespace)
+	//fmt.Println("name = ", name)
 	service, err :=clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		fmt.Printf("Service %s in namespace %s not found\n", service, namespace)
@@ -170,10 +171,19 @@ func (s *ServicesController)DelService() {
 // @Success 200 {string} 更新成功
 // @router / [put]
 func (s *ServicesController)UpdS(){
-	namespace := s.Ctx.Input.Param(":namespace")
+	namespace := s.Input().Get("namespace")
 	name := s.Input().Get("name")
-	service, err := clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
-	_, err = clientset.CoreV1().Services(namespace).Update(service)
+	//fmt.Println("namespace = ", namespace)
+	//fmt.Println("name = ", name)
+	//service, err := clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
+	var service1 v1.Service
+	err1 := json.Unmarshal([]byte(name), &service1)
+	if err1 != nil {
+		panic(err1.Error())
+	}
+
+	_, err := clientset.CoreV1().Services(namespace).Update(&service1)
+
 	if err != nil {
 		s.Data["json"] = map[string]interface{}{"code": 400, "data": err.Error()}
 		s.ServeJSON()
