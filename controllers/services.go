@@ -31,7 +31,6 @@ var clientset = getClientset()
 func (s *ServicesController) GetServices() {
 	//clientset := getInClusterClientset()
 	namespace := s.Input().Get("namespace")
-	fmt.Println("namespace = ", namespace)
 	services, err := clientset.CoreV1().Services(namespace).List(metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
@@ -51,36 +50,9 @@ func (s *ServicesController) GetServices() {
 func (s *ServicesController) GetSingleService() {
 	namespace := s.Ctx.Input.Param(":namespace")
 	name := s.Input().Get("name")
-	//fmt.Println("namespace = ", namespace)
-	//fmt.Println("name = ", name)
+	fmt.Println("namespace = ", namespace)
+	fmt.Println("name = ", name)
 	service, err :=clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
-	if errors.IsNotFound(err) {
-		fmt.Printf("Service %s in namespace %s not found\n", service, namespace)
-	} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
-		fmt.Printf("Error getting service %s in namespace %s: %v\n",
-			service, namespace, statusError.ErrStatus.Message)
-	} else if err != nil {
-		panic(err.Error())
-	} else {
-		//fmt.Printf("Found service %s in namespace %s\n", service, namespace)
-		s.Data["json"] = map[string]interface{}{"code": 20000, "data": service}
-		s.ServeJSON()
-	}
-}
-
-// @Title getService
-// @Description get service by namespace
-// @Param namespace path string false "namespace for service"
-// @Param name query string false "name for service"
-// @Success 200 {object} models.User
-// @router /:name [get]
-func (s *ServicesController) GetService() {
-	//clientset := getClientset()
-
-	namespace := s.Input().Get("namespace")
-	name := s.Ctx.Input.Param(":name")
-	service, err := clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
-
 	if errors.IsNotFound(err) {
 		fmt.Printf("Service %s in namespace %s not found\n", service, namespace)
 	} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
