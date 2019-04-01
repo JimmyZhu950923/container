@@ -21,12 +21,12 @@ type ServicesController struct {
 
 var clientset = getClientset()
 
-// @Title GetAll
+// @Title getServices
 // @Description get all Services,
 // @Param namespace query string false "namespace for service"
 // @Success 200 {object} models.User
 // @router / [get]
-func (s *ServicesController) GetAll() {
+func (s *ServicesController) GetServices() {
 	//clientset := getInClusterClientset()
 	namespace := s.Input().Get("namespace")
 	services, err := clientset.CoreV1().Services(namespace).List(metav1.ListOptions{})
@@ -39,13 +39,13 @@ func (s *ServicesController) GetAll() {
 	s.ServeJSON()
 }
 
-// @Title GetSingle
+// @Title getSingle
 // @Description get one Service,
 // @Param namespace path string false "namespace for service"
 // @Param name query string false "name for service"
 // @Success 200 {object} models.User
 // @router /:namespace [get]
-func (s *ServicesController) GetSingle() {
+func (s *ServicesController) GetSingleService() {
 	namespace := s.Ctx.Input.Param(":namespace")
 	name := s.Input().Get("name")
 	//fmt.Println("namespace = ", namespace)
