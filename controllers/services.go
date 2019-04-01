@@ -160,14 +160,17 @@ func (s *ServicesController)DelService() {
 	//// @Title updService
 	//// @Description updeate service
 	//// @Success 200 {string} 更新成功
-	//// @router /updS [get]
+	//// @router / [put]
 	//func (s *ServicesController)UpdS(){
-	//	service, err := clientset.CoreV1().Services("default").Get("example-service", metav1.GetOptions{})
-	//	service.SetName("")
-	//	service1, err := clientset.CoreV1().Services("default").Update(service)
+	//	namespace := s.Ctx.Input.Param(":namespace")
+	//	name := s.Input().Get("name")
+	//	service, err := clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
+	//	_, err = clientset.CoreV1().Services(namespace).Update(service)
 	//	if err != nil {
-	//		panic(err.Error())
+	//		s.Data["json"] = map[string]interface{}{"code": 400, "data": err.Error()}
+	//		s.ServeJSON()
+	//	} else {
+	//		s.Data["json"] = map[string]interface{}{"code": 20000}
+	//		s.ServeJSON()
 	//	}
-	//	s.Data["json"] = service1
-	//	s.ServeJSON()
 	//}
