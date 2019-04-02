@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/astaxie/beego"
 	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -50,13 +53,19 @@ func (s *ServicesController) GetSingleService() {
 	name := s.Input().Get("name")
 	//fmt.Println("namespace = ", namespace)
 	//fmt.Println("name = ", name)
-	services, err :=clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
+	service, err :=clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
+	if errors.IsNotFound(err) {
+		fmt.Printf("Service %s in namespace %s not found\n", service, namespace)
+	} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
+		fmt.Printf("Error getting service %s in namespace %s: %v\n",
+			service, namespace, statusError.ErrStatus.Message)
+	} else if err != nil {
 		panic(err.Error())
+	} else {
+		//fmt.Printf("Found service %s in namespace %s\n", service, namespace)
+		s.Data["json"] = map[string]interface{}{"code": 20000, "data": service}
+		s.ServeJSON()
 	}
-	json := map[string]interface{}{"data": services, "code": 20000}
-	s.Data["json"] = json
-	s.ServeJSON()
 }
 
 func homeDir() string {
@@ -157,20 +166,29 @@ func (s *ServicesController)DelService() {
 	s.ServeJSON()
 }
 
-	//// @Title updService
-	//// @Description updeate service
-	//// @Success 200 {string} 更新成功
-	//// @router / [put]
-	//func (s *ServicesController)UpdS(){
-	//	namespace := s.Ctx.Input.Param(":namespace")
-	//	name := s.Input().Get("name")
-	//	service, err := clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
-	//	_, err = clientset.CoreV1().Services(namespace).Update(service)
-	//	if err != nil {
-	//		s.Data["json"] = map[string]interface{}{"code": 400, "data": err.Error()}
-	//		s.ServeJSON()
-	//	} else {
-	//		s.Data["json"] = map[string]interface{}{"code": 20000}
-	//		s.ServeJSON()
-	//	}
-	//}
+// @Title updService
+// @Description updeate service
+// @Success 200 {string} 更新成功
+// @router / [put]
+func (s *ServicesController)UpdS(){
+	namespace := s.Input().Get("namespace")
+	name := s.Input().Get("name")
+	//fmt.Println("namespace = ", namespace)
+	//fmt.Println("name = ", name)
+	//service, err := clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
+	var service1 v1.Service
+	err1 := json.Unmarshal([]byte(name), &service1)
+	if err1 != nil {
+		panic(err1.Error())
+	}
+
+	_, err := clientset.CoreV1().Services(namespace).Update(&service1)
+
+	if err != nil {
+		s.Data["json"] = map[string]interface{}{"code": 400, "data": err.Error()}
+		s.ServeJSON()
+	} else {
+		s.Data["json"] = map[string]interface{}{"code": 20000}
+		s.ServeJSON()
+	}
+}
