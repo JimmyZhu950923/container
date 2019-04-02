@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"strconv"
@@ -9,7 +10,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/util/retry"
 )
 
 // Operations about WorkBlance
@@ -154,22 +154,47 @@ func (w *WorkBlanceController) UpdateDeployment() {
 	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 
 	name := w.Input().Get("name")
-	num, _ := strconv.ParseInt(w.Input().Get("num"), 10, 32)
+	num := w.Input().Get("num")
 
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+	if num != "" {
+		num, err := strconv.ParseInt(w.Input().Get("num"), 10, 32)
+		if err != nil {
+			panic(err.Error())
+		}
 		result, getErr := deploymentsClient.Get(name, metav1.GetOptions{})
 		if getErr != nil {
 			panic(fmt.Errorf("Failed to get latest version of Deployment: %v", getErr))
 		}
 
 		result.Spec.Replicas = int32Ptr(int32(num)) // reduce replica count
-		//result.Spec.Template.Spec.Containers[0].Image = "nginx:1.13" // change nginx version
+
 		_, updateErr := deploymentsClient.Update(result)
-		return updateErr
-	})
-	if retryErr != nil {
-		panic(fmt.Errorf("Update failed: %v", retryErr))
+		if updateErr != nil {
+			panic(updateErr.Error())
+		} else {
+			fmt.Println("Updated deployment...")
+			w.Data["json"] = map[string]int{"code": 20000}
+			w.ServeJSON()
+		}
+	} else {
+
+		var deployment1 appsv1.Deployment
+		err1 := json.Unmarshal([]byte(name), &deployment1)
+		if err1 != nil {
+			panic(err1.Error())
+		}
+
+		_, err := deploymentsClient.Update(&deployment1)
+		if err != nil {
+			panic(err.Error())
+		} else {
+			fmt.Println("Updated deployment...")
+			w.Data["json"] = map[string]int{"code": 20000}
+			w.ServeJSON()
+		}
+
 	}
+
 	fmt.Println("Updated deployment...")
 	w.Data["json"] = map[string]int{"code": 20000}
 	w.ServeJSON()
@@ -284,32 +309,29 @@ func (w *WorkBlanceController) CreateDaemonset() {
 // @Failure 403
 // @router /daemonset [put]
 func (w *WorkBlanceController) UpdateDaemonset() {
-	//clientset := getClientset()
 
-	//namespace := w.Input().Get("namespace")
+	namespace := w.Input().Get("namespace")
+	daemonset := w.Input().Get("name")
 
-	daemonsetsClient := clientset.AppsV1().DaemonSets("default")
+	fmt.Println(daemonset)
 
-	//name := w.Input().Get("name")
-	//num, _ := strconv.ParseInt(w.Input().Get("num"), 10, 32)
-
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, getErr := daemonsetsClient.Get("test", metav1.GetOptions{})
-		if getErr != nil {
-			panic(fmt.Errorf("Failed to get latest version of daemonset: %v", getErr))
-		}
-
-		result.Spec.Template.Spec.NodeSelector = map[string]string{"testnode": "node1"}
-		//result.Spec.Template.Spec.Containers[0].Image = "nginx:1.13" // change nginx version
-		_, updateErr := daemonsetsClient.Update(result)
-		return updateErr
-	})
-	if retryErr != nil {
-		panic(fmt.Errorf("Update failed: %v", retryErr))
+	var daemonset1 appsv1.DaemonSet
+	err1 := json.Unmarshal([]byte(daemonset), &daemonset1)
+	if err1 != nil {
+		panic(err1.Error())
 	}
-	fmt.Println("Updated daemonset...")
-	w.Data["json"] = map[string]int{"code": 20000}
-	w.ServeJSON()
+
+	_, err := clientset.AppsV1().DaemonSets(namespace).Update(&daemonset1)
+	if err != nil {
+		//w.Data["json"] = map[string]int{"code": 400}
+		//w.ServeJSON()
+		panic(err.Error())
+	} else {
+
+		fmt.Println("Updated daemonset...")
+		w.Data["json"] = map[string]int{"code": 20000}
+		w.ServeJSON()
+	}
 }
 
 // GetAll ...
