@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/astaxie/beego"
 	v1 "k8s.io/api/core/v1"
@@ -40,7 +41,10 @@ func (n *NamespaceController) GetSingle() {
 	name := n.Ctx.Input.Param(":name")
 	fmt.Println(name)
 	namespace, err := clientset.CoreV1().Namespaces().Get(name, metav1.GetOptions{})
-	if err != nil {
+	if errors.IsNotFound(err) {
+		n.Data["json"] = map[string]interface{}{"code": 20000}
+		n.ServeJSON()
+	} else if err != nil {
 		n.Data["json"] = map[string]interface{}{"code": 400, "message": name + "不存在"}
 		n.ServeJSON()
 	} else {

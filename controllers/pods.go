@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/astaxie/beego"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -26,10 +25,8 @@ func (p *PodsController) GetSingle() {
 	pod, err := clientset.CoreV1().Pods(namespace).Get(podName, metav1.GetOptions{})
 
 	if errors.IsNotFound(err) {
-		fmt.Printf("Pod %s in namespace %s not found\n", pod, namespace)
-	} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
-		fmt.Printf("Error getting pod %s in namespace %s: %v\n",
-			pod, namespace, statusError.ErrStatus.Message)
+		p.Data["json"] = map[string]interface{}{"code": 20000}
+		p.ServeJSON()
 	} else if err != nil {
 		panic(err.Error())
 	} else {
@@ -89,7 +86,7 @@ func (p *PodsController) GetPodsInNameSpace() {
 	if err != nil {
 		panic(err.Error())
 	} else {
-		fmt.Println("There are ", len(pods.Items), " pods in", nameSpace)
+		//fmt.Println("There are ", len(pods.Items), " pods in", nameSpace)
 
 		p.Data["json"] = map[string]interface{}{"code": 20000, "data": pods}
 		p.ServeJSON()
@@ -132,12 +129,13 @@ func (p *PodsController) DeletedPod() {
 	err := clientset.CoreV1().Pods(namespace).Delete(name, &metav1.DeleteOptions{})
 
 	if err != nil {
-		panic(err.Error())
+		//panic(err.Error())
 		p.Data["json"] = map[string]int{"message": 111111111}
 		p.ServeJSON()
+	} else {
+		p.Data["json"] = map[string]int{"code": 20000}
+		p.ServeJSON()
 	}
-	p.Data["json"] = map[string]int{"code": 20000}
-	p.ServeJSON()
 }
 
 // @Title UpdatedPod
