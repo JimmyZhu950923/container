@@ -60,6 +60,11 @@ func init() {
 				&controllers.StorageController{},
 				),
 			),
+		beego.NSNamespace("/config",
+			beego.NSInclude(
+				&controllers.ConfigController{},
+			),
+		),
 		beego.NSNamespace("/user",
 			beego.NSInclude(
 				&controllers.UserController{},
