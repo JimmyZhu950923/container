@@ -307,10 +307,10 @@ func (w *WorkBlanceController) CreateDaemonset() {
 					},
 				},
 				Spec: apiv1.PodSpec{
-					NodeSelector: map[string]string{
-						"testnode":                "node1",
-						"beta.kubernetes.io/arch": "arm64",
-					},
+					//NodeSelector: map[string]string{
+					//	"testnode":                "node1",
+					//	"beta.kubernetes.io/arch": "arm64",
+					//},
 					Containers: []apiv1.Container{
 						{
 							Name:  "web",
