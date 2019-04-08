@@ -79,7 +79,7 @@ func (c *ClusterController) DeleteById() {
 	return
 }
 
-//@router /byName/:name [get]
+//@router /:name [get]
 func (c *ClusterController) FindByName() {
 	name := c.Ctx.Input.Param(":name")
 	err := models.FindClusterByName(name)
