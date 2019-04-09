@@ -1,15 +1,17 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	"strconv"
+	"strings"
 
 	"github.com/astaxie/beego"
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/util/retry"
 )
 
 // Operations about WorkBlance
@@ -31,10 +33,12 @@ func (w *WorkBlanceController) GetSingleDeployment() {
 	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 
 	deployment, err := deploymentsClient.Get(name, metav1.GetOptions{})
-	if err != nil {
-		//panic(err)
+
+	if errors.IsNotFound(err) {
 		w.Data["json"] = map[string]interface{}{"code": 20000}
 		w.ServeJSON()
+	} else if err != nil {
+		panic(err)
 	} else {
 		w.Data["json"] = map[string]interface{}{"code": 20000, "data": deployment}
 		w.ServeJSON()
@@ -82,9 +86,9 @@ func (w *WorkBlanceController) CreateDeployment() {
 	image := w.Input().Get("image")
 	namespace := w.Input().Get("namespace")
 
-	fmt.Println(">>>>>>>>>>>>>")
-	fmt.Println(name, num, image, namespace)
-	fmt.Println(">>>>>>>>>>>>>")
+	//fmt.Println(">>>>>>>>>>>>>")
+	//fmt.Println(name, num, image, namespace)
+	//fmt.Println(">>>>>>>>>>>>>")
 
 	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 	var deployment = &appsv1.Deployment{
@@ -124,8 +128,8 @@ func (w *WorkBlanceController) CreateDeployment() {
 		},
 	}
 	// Create Deployment
-	fmt.Println("Creating deployment...")
-	result, err := deploymentsClient.Create(deployment)
+	//fmt.Println("Creating deployment...")
+	_, err = deploymentsClient.Create(deployment)
 
 	if err != nil {
 		k8Err := err.(*errors.StatusError)
@@ -133,10 +137,48 @@ func (w *WorkBlanceController) CreateDeployment() {
 		w.Data["json"] = map[string]interface{}{"code": k8Err.ErrStatus.Code, "message": "负载" + name + "已存在"}
 		w.ServeJSON()
 	} else {
-		fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
+		//fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
 		w.Data["json"] = map[string]int{"code": 20000}
 		w.ServeJSON()
 	}
+}
+
+// Create deployment ...
+// @Title Create deployment
+// @Description get Userinfo
+// @Param deployment body string "deploment of the yaml or josn"
+// @Param namespace query string "namespace of the deployment"
+// @Success 200 {object} models.Userinfo
+// @Failure 403
+// @router /:namespace [post]
+func (w *WorkBlanceController) CreateDeploymentByYaml() {
+
+	deployment := w.Ctx.Input.RequestBody
+	namespace := w.Ctx.Input.Param(":namespace")
+	var err error
+	if strings.Index(string(deployment), "{") == -1 {
+		deployment, err = yaml.ToJSON(deployment)
+		if err != nil {
+			panic(err.Error())
+		}
+
+	}
+	var deploymentEntity appsv1.Deployment
+	//fmt.Println(string(deployment))
+	err = json.Unmarshal(deployment, &deploymentEntity)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	_, err = clientset.AppsV1().Deployments(namespace).Create(&deploymentEntity)
+	if err != nil {
+		panic(err.Error())
+	} else {
+		//fmt.Println("创建陈工")
+		w.Data["json"] = map[string]int{"code": 20000}
+		w.ServeJSON()
+	}
+
 }
 
 // Update deployment
@@ -154,23 +196,48 @@ func (w *WorkBlanceController) UpdateDeployment() {
 	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 
 	name := w.Input().Get("name")
-	num, _ := strconv.ParseInt(w.Input().Get("num"), 10, 32)
+	num := w.Input().Get("num")
 
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+	if num != "" {
+		num, err := strconv.ParseInt(w.Input().Get("num"), 10, 32)
+		if err != nil {
+			panic(err.Error())
+		}
 		result, getErr := deploymentsClient.Get(name, metav1.GetOptions{})
 		if getErr != nil {
-			panic(fmt.Errorf("Failed to get latest version of Deployment: %v", getErr))
+			panic(fmt.Errorf("Failed to get latest version of Deployment: %v ", getErr))
 		}
 
 		result.Spec.Replicas = int32Ptr(int32(num)) // reduce replica count
-		//result.Spec.Template.Spec.Containers[0].Image = "nginx:1.13" // change nginx version
+
 		_, updateErr := deploymentsClient.Update(result)
-		return updateErr
-	})
-	if retryErr != nil {
-		panic(fmt.Errorf("Update failed: %v", retryErr))
+		if updateErr != nil {
+			panic(updateErr.Error())
+		} else {
+			//fmt.Println("Updated deployment...")
+			w.Data["json"] = map[string]int{"code": 20000}
+			w.ServeJSON()
+		}
+	} else {
+
+		var deployment1 appsv1.Deployment
+		err1 := json.Unmarshal([]byte(name), &deployment1)
+		if err1 != nil {
+			panic(err1.Error())
+		}
+
+		_, err := deploymentsClient.Update(&deployment1)
+		if err != nil {
+			panic(err.Error())
+		} else {
+			//fmt.Println("Updated deployment...")
+			w.Data["json"] = map[string]int{"code": 20000}
+			w.ServeJSON()
+		}
+
 	}
-	fmt.Println("Updated deployment...")
+
+	//fmt.Println("Updated deployment...")
 	w.Data["json"] = map[string]int{"code": 20000}
 	w.ServeJSON()
 }
@@ -195,7 +262,7 @@ func (w *WorkBlanceController) DeleteDeployment() {
 	}); err != nil {
 		panic(err)
 	}
-	fmt.Println("Deleted deployment.")
+	//fmt.Println("Deleted deployment.")
 	w.Data["json"] = map[string]int{"code": 20000}
 	w.ServeJSON()
 }
@@ -217,9 +284,9 @@ func (w *WorkBlanceController) CreateDaemonset() {
 	image := w.Input().Get("image")
 	namespace := w.Input().Get("namespace")
 
-	fmt.Println(">>>>>>>>>>>>>")
-	fmt.Println(name, image, namespace)
-	fmt.Println(">>>>>>>>>>>>>")
+	//fmt.Println(">>>>>>>>>>>>>")
+	//fmt.Println(name, image, namespace)
+	//fmt.Println(">>>>>>>>>>>>>")
 
 	daemosetsClient := clientset.AppsV1().DaemonSets(namespace)
 	var daemonset = &appsv1.DaemonSet{
@@ -240,14 +307,14 @@ func (w *WorkBlanceController) CreateDaemonset() {
 					},
 				},
 				Spec: apiv1.PodSpec{
-					NodeSelector: map[string]string{
-						"testnode":                "node1",
-						"beta.kubernetes.io/arch": "arm64",
-					},
+					//NodeSelector: map[string]string{
+					//	"testnode":                "node1",
+					//	"beta.kubernetes.io/arch": "arm64",
+					//},
 					Containers: []apiv1.Container{
 						{
 							Name:  "web",
-							Image: "kube.gwunion.cn/venus/nginx:alpine",
+							Image: "kube.gwunion.cn/" + image,
 							Ports: []apiv1.ContainerPort{
 								{
 									Name:          "http",
@@ -262,8 +329,8 @@ func (w *WorkBlanceController) CreateDaemonset() {
 		},
 	}
 	// Create daemonset
-	fmt.Println("Creating daemonset...")
-	result, err := daemosetsClient.Create(daemonset)
+	//fmt.Println("Creating daemonset...")
+	_, err := daemosetsClient.Create(daemonset)
 
 	if err != nil {
 		k8Err := err.(*errors.StatusError)
@@ -271,10 +338,48 @@ func (w *WorkBlanceController) CreateDaemonset() {
 		w.Data["json"] = map[string]interface{}{"code": k8Err.ErrStatus.Code, "message": "负载" + name + "已存在"}
 		w.ServeJSON()
 	} else {
-		fmt.Printf("Created daemonset %q.\n", result.GetObjectMeta().GetName())
+		//fmt.Printf("Created daemonset %q.\n", result.GetObjectMeta().GetName())
 		w.Data["json"] = map[string]int{"code": 20000}
 		w.ServeJSON()
 	}
+}
+
+// Create daemonset ...
+// @Title Create daemonset
+// @Description get Userinfo
+// @Param daemonset body string "daemonset of the yaml or josn"
+// @Param namespace query string "namespace of the daemonset"
+// @Success 200 {object} models.Userinfo
+// @Failure 403
+// @router /daemonset/:namespace [post]
+func (w *WorkBlanceController) CreateDaemonsetByYaml() {
+
+	daemonset := w.Ctx.Input.RequestBody
+	namespace := w.Ctx.Input.Param(":namespace")
+	var err error
+	if strings.Index(string(daemonset), "{") == -1 {
+		daemonset, err = yaml.ToJSON(daemonset)
+		if err != nil {
+			panic(err.Error())
+		}
+
+	}
+	var daemonsetEntity appsv1.DaemonSet
+	//fmt.Println(string(deployment))
+	err = json.Unmarshal(daemonset, &daemonsetEntity)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	_, err = clientset.AppsV1().DaemonSets(namespace).Create(&daemonsetEntity)
+	if err != nil {
+		panic(err.Error())
+	} else {
+		//fmt.Println("创建陈工")
+		w.Data["json"] = map[string]int{"code": 20000}
+		w.ServeJSON()
+	}
+
 }
 
 // Update daemonset
@@ -284,32 +389,29 @@ func (w *WorkBlanceController) CreateDaemonset() {
 // @Failure 403
 // @router /daemonset [put]
 func (w *WorkBlanceController) UpdateDaemonset() {
-	//clientset := getClientset()
 
-	//namespace := w.Input().Get("namespace")
+	namespace := w.Input().Get("namespace")
+	daemonset := w.Input().Get("name")
 
-	daemonsetsClient := clientset.AppsV1().DaemonSets("default")
+	//fmt.Println(daemonset)
 
-	//name := w.Input().Get("name")
-	//num, _ := strconv.ParseInt(w.Input().Get("num"), 10, 32)
-
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, getErr := daemonsetsClient.Get("test", metav1.GetOptions{})
-		if getErr != nil {
-			panic(fmt.Errorf("Failed to get latest version of daemonset: %v", getErr))
-		}
-
-		result.Spec.Template.Spec.NodeSelector = map[string]string{"testnode": "node1"}
-		//result.Spec.Template.Spec.Containers[0].Image = "nginx:1.13" // change nginx version
-		_, updateErr := daemonsetsClient.Update(result)
-		return updateErr
-	})
-	if retryErr != nil {
-		panic(fmt.Errorf("Update failed: %v", retryErr))
+	var daemonset1 appsv1.DaemonSet
+	err1 := json.Unmarshal([]byte(daemonset), &daemonset1)
+	if err1 != nil {
+		panic(err1.Error())
 	}
-	fmt.Println("Updated daemonset...")
-	w.Data["json"] = map[string]int{"code": 20000}
-	w.ServeJSON()
+
+	_, err := clientset.AppsV1().DaemonSets(namespace).Update(&daemonset1)
+	if err != nil {
+		//w.Data["json"] = map[string]int{"code": 400}
+		//w.ServeJSON()
+		panic(err.Error())
+	} else {
+
+		fmt.Println("Updated daemonset...")
+		w.Data["json"] = map[string]int{"code": 20000}
+		w.ServeJSON()
+	}
 }
 
 // GetAll ...
@@ -348,10 +450,11 @@ func (w *WorkBlanceController) GetSingleDaemonset() {
 	daemonsetClient := clientset.AppsV1().DaemonSets(namespace)
 
 	daemonset, err := daemonsetClient.Get(name, metav1.GetOptions{})
-	if err != nil {
-		//panic(err)
+	if errors.IsNotFound(err) {
 		w.Data["json"] = map[string]interface{}{"code": 20000}
 		w.ServeJSON()
+	} else if err != nil {
+		panic(err)
 	} else {
 		w.Data["json"] = map[string]interface{}{"code": 20000, "data": daemonset}
 		w.ServeJSON()
@@ -378,7 +481,7 @@ func (w *WorkBlanceController) DeleteDaemonset() {
 	}); err != nil {
 		panic(err)
 	}
-	fmt.Println("Deleted daemontset.")
+	//fmt.Println("Deleted daemontset.")
 	w.Data["json"] = map[string]int{"code": 20000}
 	w.ServeJSON()
 
