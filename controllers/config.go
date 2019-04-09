@@ -79,7 +79,7 @@ func (c *ConfigController) CreateConfigByYaml() {
 	if err != nil {
 		panic(err.Error())
 	}
-	_, err = clientset.CoreV1().Services(namespace).Create(&configEntity)
+	_, err = clientset.CoreV1().ConfigMaps(namespace).Create(&configEntity)
 	if err != nil {
 		panic(err.Error())
 	}
