@@ -22,6 +22,7 @@ type Cluster struct {
 var Db orm.Ormer
 
 func init() {
+	
 	driver := beego.AppConfig.String("mysql::driver")
 	dataSource := beego.AppConfig.String("mysql::dataSource")
 	params, _ := beego.AppConfig.Int("mysql::params")

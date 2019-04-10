@@ -32,6 +32,7 @@ func (c *ClusterController) Insert() {
 		c.ServeJSON()
 		return
 	} else {
+		panic(err.Error())
 		c.Data["json"] = map[string]interface{}{"code": 20000, "message": name + "已存在"}
 		c.ServeJSON()
 		return
