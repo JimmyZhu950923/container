@@ -64,8 +64,8 @@ func (c *ConfigController) GetSingleConfig() {
 func (c *ConfigController) CreateConfigByYaml() {
 	config := c.Ctx.Input.RequestBody
 	namespace := c.Ctx.Input.Param(":namespace")
-	fmt.Println("namespace = ", namespace)
-	fmt.Println(string(config))
+	//fmt.Println("namespace = ", namespace)
+	//fmt.Println(string(config))
 	var err error
 	if strings.Index(string(config), "{") == -1 {
 		config, err = yaml.ToJSON(config)

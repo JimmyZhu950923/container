@@ -65,6 +65,11 @@ func init() {
 				&controllers.ConfigController{},
 			),
 		),
+		beego.NSNamespace("/secret",
+			beego.NSInclude(
+				&controllers.SecretController{},
+				),
+			),
 		beego.NSNamespace("/user",
 			beego.NSInclude(
 				&controllers.UserController{},
