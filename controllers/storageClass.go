@@ -53,13 +53,11 @@ func (s *StorageController) GetSingleStorage() {
 // @router /create [get]
 func (s *StorageController) CreateStorage() {
 	name := s.Input().Get("name")
-	namespace := s.Input().Get("namespace")
 	persistentVolumeReclaimPolicy := corev1.PersistentVolumeReclaimPolicy(s.Input().Get("persistentVolumeReclaimPolicy"))
 	storageClassClient := clientset.StorageV1().StorageClasses()
 	var storage = &storageV1.StorageClass{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace:	namespace,
 		},
 		Provisioner:"",
 		Parameters: map[string]string{},
