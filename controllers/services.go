@@ -8,12 +8,14 @@ import (
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 // Operations about Users
@@ -55,7 +57,8 @@ func (s *ServicesController) GetSingleService() {
 	//fmt.Println("name = ", name)
 	service, err :=clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
-		fmt.Printf("Service %s in namespace %s not found\n", service, namespace)
+		s.Data["json"] = map[string]interface{}{"code": 20000}
+		s.ServeJSON()
 	} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
 		fmt.Printf("Error getting service %s in namespace %s: %v\n",
 			service, namespace, statusError.ErrStatus.Message)
@@ -146,6 +149,41 @@ func (s *ServicesController)CreateService() {
 	s.ServeJSON()
 	return
 	}
+
+// @Title createServiceByYaml
+// @Description create new service
+// @Param service1 body string false "service"
+// @Param namespace body string false "namespace for service"
+// @Success 200 {string} 添加成功
+// @Failure 403
+// @router /:namespace [post]
+func (s *ServicesController) CreateServiceByYaml() {
+	service := s.Ctx.Input.RequestBody
+	namespace := s.Ctx.Input.Param(":namespace")
+	fmt.Println("namespace = ", namespace)
+	fmt.Println(string(service))
+	var err error
+	if strings.Index(string(service), "{") == -1 {
+		service, err = yaml.ToJSON(service)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	var serviceEntity v1.Service
+	err = json.Unmarshal(service, &serviceEntity)
+	if err != nil {
+		panic(err.Error())
+	}
+	_, err = clientset.CoreV1().Services(namespace).Create(&serviceEntity)
+	if err != nil {
+		panic(err.Error())
+	}
+	json := map[string]interface{}{"code": 20000}
+	s.Data["json"] = json
+	s.ServeJSON()
+	return
+}
 
 // @Title delService
 // @Description delete one service

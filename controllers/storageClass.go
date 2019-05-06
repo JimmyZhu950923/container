@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/astaxie/beego"
 	corev1 "k8s.io/api/core/v1"
 	storageV1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
+	"strings"
 )
 
 // Operations about Users
@@ -50,13 +53,11 @@ func (s *StorageController) GetSingleStorage() {
 // @router /create [get]
 func (s *StorageController) CreateStorage() {
 	name := s.Input().Get("name")
-	namespace := s.Input().Get("namespace")
 	persistentVolumeReclaimPolicy := corev1.PersistentVolumeReclaimPolicy(s.Input().Get("persistentVolumeReclaimPolicy"))
 	storageClassClient := clientset.StorageV1().StorageClasses()
 	var storage = &storageV1.StorageClass{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace:	namespace,
 		},
 		Provisioner:"",
 		Parameters: map[string]string{},
@@ -67,6 +68,38 @@ func (s *StorageController) CreateStorage() {
 		panic(err.Error())
 	}
 	json := map[string]interface{}{"data": storage1, "code": 20000}
+	s.Data["json"] = json
+	s.ServeJSON()
+	return
+}
+
+// @Title createStorageByYaml
+// @Description create new storage
+// @Param service1 body string false "storage"
+// @Param namespace body string false "namespace for storage"
+// @Success 200 {string} 添加成功
+// @Failure 403
+// @router /:namespace [post]
+func (s *StorageController) CreateStorageByYaml() {
+	storage := s.Ctx.Input.RequestBody
+	var err error
+	if strings.Index(string(storage), "{") == -1 {
+		storage, err = yaml.ToJSON(storage)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	var storageEntity storageV1.StorageClass
+	err = json.Unmarshal(storage, &storageEntity)
+	if err != nil {
+		panic(err.Error())
+	}
+	_, err = clientset.StorageV1().StorageClasses().Create(&storageEntity)
+	if err != nil {
+		panic(err.Error())
+	}
+	json := map[string]interface{}{"code": 20000}
 	s.Data["json"] = json
 	s.ServeJSON()
 	return
@@ -87,4 +120,27 @@ func (s *StorageController) DelStorage() {
 	json := map[string]interface{}{"code": 20000}
 	s.Data["json"] = json
 	s.ServeJSON()
+}
+
+// @Title updStorage
+// @Description updeate storage
+// @Success 200 {string} 更新成功
+// @router / [put]
+func (s *StorageController) UpdateStorage() {
+	name := s.Input().Get("name")
+	var storage1 storageV1.StorageClass
+	err1 := json.Unmarshal([]byte(name), &storage1)
+	if err1 != nil {
+		panic(err1.Error())
+	}
+
+	_, err := clientset.StorageV1().StorageClasses().Update(&storage1)
+
+	if err != nil {
+		s.Data["json"] = map[string]interface{}{"code": 400, "data": err.Error()}
+		s.ServeJSON()
+	} else {
+		s.Data["json"] = map[string]interface{}{"code": 20000}
+		s.ServeJSON()
+	}
 }
