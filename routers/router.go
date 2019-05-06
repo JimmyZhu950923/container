@@ -58,7 +58,6 @@ func init() {
 		beego.NSNamespace("/storage",
 			beego.NSInclude(
 				&controllers.StorageController{},
-				),
 			),
 		beego.NSNamespace("/config",
 			beego.NSInclude(
@@ -83,6 +82,11 @@ func init() {
 		beego.NSNamespace("/namespace",
 			beego.NSInclude(
 				&controllers.NamespaceController{},
+			),
+		),
+		beego.NSNamespace("/cluster",
+			beego.NSInclude(
+				&controllers.ClusterController{},
 			),
 		),
 		beego.NSNamespace("/wb",

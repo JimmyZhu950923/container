@@ -1,89 +1,96 @@
 package controllers
 
 import (
-	"fmt"
+	"gt-container-go/models"
+	"strconv"
+	"time"
 
 	"github.com/astaxie/beego"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/astaxie/beego/orm"
 )
 
-// Operations about Users
-type NamespaceController struct {
+type ClusterController struct {
 	beego.Controller
 }
 
-//var clientset = getClientset()
-
-// @Title Get All Namespace
-// @Description get namespace
-// @Success 200 {object} models.User
-// @router / [get]
-func (n *NamespaceController) GetNamespace() {
-	// clientset := getClientset()
-	namespace, err := clientset.CoreV1().Namespaces().List(metav1.ListOptions{})
-	if err != nil {
-		panic(err)
-	}
-	var json = map[string]interface{}{"code": 20000, "data": namespace}
-	n.Data["json"] = json
-	n.ServeJSON()
-	return
-}
-
-// @Title Get a Namespace
-// @Description get  namespace by name
-// @Param name path string true "Namespace name"
-// @Success 200 {object} models.User
-//@router /:name [get]
-func (n *NamespaceController) GetSingle() {
-	name := n.Ctx.Input.Param(":name")
-	fmt.Println(name)
-	namespace, err := clientset.CoreV1().Namespaces().Get(name, metav1.GetOptions{})
-	if err != nil {
-		n.Data["json"] = map[string]interface{}{"code": 400, "message": name + "不存在"}
-		n.ServeJSON()
-	} else {
-		var json = map[string]interface{}{"code": 20000, "data": namespace}
-		n.Data["json"] = json
-		n.ServeJSON()
-		return
-	}
-}
-
-// @Title Add a Namespace
-// @Description set name insert namespace
-// @Param name query string true "Namespace name"
+// @Title Insert Cluster
+// @Description Add a cluster
+//@Param name query string false "cluster's name"
+//@Param displayName query string false "cluster's displayName"
+//@Param namespace query string false "cluster's namespace"
+//@Param apiService query string false "cluster's api_service"
 // @Success 200 {object} models.User
 //@router / [post]
-func (n *NamespaceController) Add() {
-	var namespace v1.Namespace
-	name := n.Input().Get("name")
-	namespace.SetName(name)
-	ns, err := clientset.CoreV1().Namespaces().Create(&namespace)
-	if err != nil {
-		n.Data["json"] = map[string]interface{}{"code": 409, "message": name + "已存在"}
-		n.ServeJSON()
+func (c *ClusterController) Insert() {
+	name := c.Input().Get("name")
+	namespace := c.Input().Get("namespace")
+	err := models.FindClusterByName(name)
+	if err == orm.ErrNoRows {
+		var cluster = models.Cluster{Name: name, Namespace: namespace, CreateDate: time.Now()}
+		id, _ := models.Insert(&cluster)
+		c.Data["json"] = map[string]interface{}{"code": 20000, "data": id}
+		c.ServeJSON()
+		return
 	} else {
-		var json = map[string]interface{}{"code": 20000, "data": ns}
-		n.Data["json"] = json
-		n.ServeJSON()
+		panic(err.Error())
+		c.Data["json"] = map[string]interface{}{"code": 20000, "message": name + "已存在"}
+		c.ServeJSON()
 		return
 	}
+
 }
 
-// @Title Delete  Namespace
-// @Description delete namespace by name
-// @Param name  path string true "Namespace name"
+// @Title GetAll
+// @Description get all Cluster
 // @Success 200 {object} models.User
-//@router /:name [delete]
-func (n *NamespaceController) Delete() {
-	name := n.Ctx.Input.Param(":name")
-	err := clientset.CoreV1().Namespaces().Delete(name, &metav1.DeleteOptions{})
-	if err != nil {
-		panic(err)
-	}
-	n.Data["json"] = map[string]int{"code": 20000}
-	n.ServeJSON()
+//@router / [get]
+func (c *ClusterController) Select() {
+	var clusters []models.Cluster
+	row, _ := models.Select(&clusters)
+	c.Data["json"] = map[string]interface{}{"code": 20000, "data": clusters, "row": row}
+	c.ServeJSON()
 	return
+}
+
+// @Title Get a cluster
+// @Description get cluster by namespace
+//@Param namespace query string false "cluster's namespace"
+// @Success 200 {object} models.User
+//@router /:namespace [get]
+func (c *ClusterController) GetByNamespace() {
+	var clusters []models.Cluster
+	namespace := c.Ctx.Input.Param(":namespace")
+	row, _ := models.FindByNamespace(namespace, &clusters)
+	c.Data["json"] = map[string]interface{}{"code": 20000, "data": clusters, "row": row}
+	c.ServeJSON()
+	return
+}
+
+// @Title Delete a cluster
+// @Description Delete cluster by id
+//@Param id query string false "cluster's id"
+// @Success 200 {object} models.User
+// @router /:id [delete]
+func (c *ClusterController) DeleteById() {
+	str := c.Ctx.Input.Param(":id")
+	id, _ := strconv.ParseInt(str, 10, 64)
+	num, _ := models.DeleteCluster(id)
+	c.Data["json"] = map[string]interface{}{"code": 20000, "num": num}
+	c.ServeJSON()
+	return
+}
+
+//@router /:name [get]
+func (c *ClusterController) FindByName() {
+	name := c.Ctx.Input.Param(":name")
+	err := models.FindClusterByName(name)
+	if err == orm.ErrNoRows {
+		c.Data["json"] = map[string]interface{}{"code": 20000}
+		c.ServeJSON()
+		return
+	} else {
+		c.Data["json"] = map[string]interface{}{"code": 400}
+		c.ServeJSON()
+		return
+	}
 }
